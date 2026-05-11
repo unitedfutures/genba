@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GENBA - 現場タスク・進捗管理
 
-## Getting Started
+建設・工事現場向けタスク管理・作業日報アプリ
 
-First, run the development server:
+## 技術スタック
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend**: Next.js 14 (App Router) + TypeScript
+- **DB・認証・ストレージ**: Supabase
+- **Styling**: Tailwind CSS v4
+- **Deploy**: Vercel
+
+---
+
+## セットアップ手順
+
+### 1. Supabaseプロジェクトを作成
+
+1. https://supabase.com にアクセス
+2. 「Start your project」→ GitHubアカウントでサインイン
+3. 「New project」をクリック
+4. プロジェクト名: `genba`、パスワードを設定してCreate
+
+### 2. データベースを初期化
+
+1. Supabaseダッシュボード → **SQL Editor**
+2. `supabase/migrations/001_initial_schema.sql` の内容を貼り付けて実行
+
+### 3. Storageバケットを作成
+
+1. Supabaseダッシュボード → **Storage** → **New bucket**
+2. Bucket名: `work-photos`
+3. Public: **OFF**（非公開）
+
+### 4. 環境変数を設定
+
+1. Supabaseダッシュボード → **Settings** → **API**
+2. `Project URL` と `anon public` キーをコピー
+3. プロジェクトルートに `.env.local` を作成:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxxxxxxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 5. ローカル起動
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+http://localhost:3000 にアクセス
 
-## Learn More
+### 6. 最初の管理者アカウントを作成
 
-To learn more about Next.js, take a look at the following resources:
+1. Supabaseダッシュボード → **Authentication** → **Users** → **Add user**
+2. メールアドレスとパスワードを設定
+3. **SQL Editor** で以下を実行:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```sql
+-- 組織を作成
+insert into public.organizations (name, slug)
+values ('会社名', 'company-slug')
+returning id;
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+-- 管理者profileを更新（上記のIDとAuthのuser IDを使用）
+update public.profiles
+set organization_id = '<<organization_id>>',
+    role = 'admin',
+    full_name = '管理者氏名'
+where id = '<<user_id>>';
+```
 
-## Deploy on Vercel
+4. `/auth/login` でログイン
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 7. GitHubにpush → Vercelでデプロイ
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+git remote add origin https://github.com/unitedfutures/genba.git
+git branch -M main
+git push -u origin main
+```
+
+Vercel (https://vercel.com):
+1. GitHubでサインイン → 「Add New Project」→ `genba` を選択
+2. Environment Variables に SUPABASE_URL と ANON_KEY を追加
+3. Deploy
+
+---
+
+## 画面一覧
+
+| 画面 | URL | 対象 |
+|------|-----|------|
+| ログイン | /auth/login | 全員 |
+| 招待受け入れ | /auth/invite/[token] | 招待者 |
+| ダッシュボード | /dashboard | 管理者 |
+| スタッフ管理 | /staff | 管理者 |
+| 現場管理 | /sites | 管理者 |
+| タスク管理 | /tasks | 管理者 |
+| 日報管理 | /reports | 管理者 |
+| マイページ | /my | 作業者 |
+| 打刻 | /my/clock | 作業者 |
+| 自分の日報 | /my/reports | 作業者 |
+| プロフィール | /profile | 全員 |
