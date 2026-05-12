@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { HardHat, Eye, EyeOff } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -98,9 +99,17 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-gray-500 text-xs mt-6">
-          アカウントは管理者からの招待メールで作成できます
-        </p>
+        <div className="text-center mt-6 space-y-2">
+          <p className="text-gray-400 text-sm">
+            初めてご利用の方は
+            <Link href="/auth/signup" className="text-orange-400 font-medium ml-1">
+              新規アカウント作成
+            </Link>
+          </p>
+          <p className="text-gray-600 text-xs">
+            スタッフの方は管理者からの招待リンクをご利用ください
+          </p>
+        </div>
       </div>
     </div>
   )
