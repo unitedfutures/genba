@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserCircle, Save, LogOut } from 'lucide-react'
+import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff } from 'lucide-react'
 import { signOut } from '@/lib/supabase/actions'
 
 export default function ProfilePage() {
@@ -10,6 +10,12 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ full_name: '', phone: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  const [pwForm, setPwForm] = useState({ password: '', confirm: '' })
+  const [showPw, setShowPw] = useState(false)
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwError, setPwError] = useState('')
+  const [pwSaved, setPwSaved] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -42,6 +48,30 @@ export default function ProfilePage() {
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault()
+    setPwError('')
+    if (pwForm.password !== pwForm.confirm) {
+      setPwError('パスワードが一致しません')
+      return
+    }
+    if (pwForm.password.length < 8) {
+      setPwError('パスワードは8文字以上で入力してください')
+      return
+    }
+    setPwSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.updateUser({ password: pwForm.password })
+    if (error) {
+      setPwError('変更に失敗しました: ' + error.message)
+    } else {
+      setPwSaved(true)
+      setPwForm({ password: '', confirm: '' })
+      setTimeout(() => setPwSaved(false), 2000)
+    }
+    setPwSaving(false)
   }
 
   const roleLabel = profile?.role === 'admin' ? '管理者' : '作業者'
@@ -100,6 +130,58 @@ export default function ProfilePage() {
           >
             <Save size={18} />
             {saved ? '保存しました！' : saving ? '保存中...' : '保存する'}
+          </button>
+        </form>
+      </div>
+
+      {/* Password change */}
+      <div className="card">
+        <h2 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
+          <KeyRound size={18} className="text-gray-500" />
+          パスワード変更
+        </h2>
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">新しいパスワード <span className="text-red-500">*</span></label>
+            <div className="relative">
+              <input
+                type={showPw ? 'text' : 'password'}
+                value={pwForm.password}
+                onChange={e => setPwForm(f => ({ ...f, password: e.target.value }))}
+                className="input-field pr-12"
+                placeholder="8文字以上"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(v => !v)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+              >
+                {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">確認 <span className="text-red-500">*</span></label>
+            <input
+              type={showPw ? 'text' : 'password'}
+              value={pwForm.confirm}
+              onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
+              className="input-field"
+              placeholder="もう一度入力"
+              required
+            />
+          </div>
+          {pwError && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{pwError}</p>}
+          <button
+            type="submit"
+            disabled={pwSaving}
+            className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${
+              pwSaved ? 'bg-green-500 text-white' : 'btn-primary'
+            } disabled:opacity-50`}
+          >
+            <KeyRound size={18} />
+            {pwSaved ? '変更しました！' : pwSaving ? '変更中...' : 'パスワードを変更する'}
           </button>
         </form>
       </div>
