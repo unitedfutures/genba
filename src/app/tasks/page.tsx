@@ -4,14 +4,23 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, X, ClipboardList, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
-import type { Task, TaskStatus } from '@/types'
+import type { Task, TaskStatus, TaskPriority } from '@/types'
 
-type SortKey = 'created_at' | 'due_date' | 'status'
+type SortKey = 'created_at' | 'due_date' | 'status' | 'priority'
 type SortDir = 'asc' | 'desc'
 
 const statusOrder: Record<string, number> = { pending: 0, in_progress: 1, completed: 2, cancelled: 3 }
+const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 }
+const priorityConfig: Record<TaskPriority, { label: string; className: string }> = {
+  high:   { label: '高', className: 'bg-red-100 text-red-700' },
+  medium: { label: '中', className: 'bg-yellow-100 text-yellow-700' },
+  low:    { label: '低', className: 'bg-gray-100 text-gray-500' },
+}
 
-const emptyForm = { title: '', description: '', site_id: '', assigned_to: '', status: 'pending' as TaskStatus, due_date: '' }
+const emptyForm = {
+  title: '', description: '', site_id: '', assigned_to: '',
+  status: 'pending' as TaskStatus, priority: 'medium' as TaskPriority, due_date: '',
+}
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -27,13 +36,11 @@ export default function TasksPage() {
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
-  // 新規追加モーダル
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
 
-  // 編集モーダル
   const [editTask, setEditTask] = useState<Task | null>(null)
   const [editForm, setEditForm] = useState(emptyForm)
   const [editSubmitting, setEditSubmitting] = useState(false)
@@ -84,6 +91,7 @@ export default function TasksPage() {
       description: form.description || null,
       assigned_to: form.assigned_to || null,
       status: form.status,
+      priority: form.priority,
       due_date: form.due_date || null,
       created_by: userId,
     })
@@ -106,6 +114,7 @@ export default function TasksPage() {
       site_id: task.site_id,
       assigned_to: task.assigned_to ?? '',
       status: task.status,
+      priority: task.priority,
       due_date: task.due_date ?? '',
     })
   }
@@ -122,6 +131,7 @@ export default function TasksPage() {
       site_id: editForm.site_id,
       assigned_to: editForm.assigned_to || null,
       status: editForm.status,
+      priority: editForm.priority,
       due_date: editForm.due_date || null,
     }).eq('id', editTask.id)
     if (error) {
@@ -151,7 +161,7 @@ export default function TasksPage() {
       setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     } else {
       setSortKey(key)
-      setSortDir('asc')
+      setSortDir(key === 'priority' ? 'asc' : 'desc')
     }
   }
 
@@ -164,6 +174,8 @@ export default function TasksPage() {
       cmp = (a.due_date ?? '9999').localeCompare(b.due_date ?? '9999')
     } else if (sortKey === 'status') {
       cmp = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)
+    } else if (sortKey === 'priority') {
+      cmp = (priorityOrder[a.priority] ?? 9) - (priorityOrder[b.priority] ?? 9)
     } else {
       cmp = a.created_at.localeCompare(b.created_at)
     }
@@ -176,6 +188,13 @@ export default function TasksPage() {
     { label: '作業中', value: 'in_progress' },
     { label: '完了', value: 'completed' },
   ]
+
+  const PriorityBadge = ({ priority }: { priority: TaskPriority }) => {
+    const { label, className } = priorityConfig[priority]
+    return (
+      <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${className}`}>{label}</span>
+    )
+  }
 
   const TaskForm = ({ values, onChange, onSubmit, onCancel, submitting: sub, error: err, isEdit }: {
     values: typeof emptyForm
@@ -210,14 +229,24 @@ export default function TasksPage() {
           {workers.map(w => <option key={w.id} value={w.id}>{w.full_name}</option>)}
         </select>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
-        <select value={values.status} onChange={e => onChange({ ...values, status: e.target.value as TaskStatus })} className="input-field">
-          <option value="pending">未着手</option>
-          <option value="in_progress">作業中</option>
-          <option value="completed">完了</option>
-          <option value="cancelled">キャンセル</option>
-        </select>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">優先度</label>
+          <select value={values.priority} onChange={e => onChange({ ...values, priority: e.target.value as TaskPriority })} className="input-field">
+            <option value="high">🔴 高</option>
+            <option value="medium">🟡 中</option>
+            <option value="low">⚪ 低</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
+          <select value={values.status} onChange={e => onChange({ ...values, status: e.target.value as TaskStatus })} className="input-field">
+            <option value="pending">未着手</option>
+            <option value="in_progress">作業中</option>
+            <option value="completed">完了</option>
+            <option value="cancelled">キャンセル</option>
+          </select>
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">期日</label>
@@ -240,16 +269,10 @@ export default function TasksPage() {
         <h1 className="text-2xl font-black text-gray-900">タスク管理</h1>
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-gray-100 rounded-full p-0.5 text-sm font-medium">
-            <button
-              onClick={() => setMyOnly(true)}
-              className={`px-3 py-1.5 rounded-full transition-colors ${myOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
-            >
+            <button onClick={() => setMyOnly(true)} className={`px-3 py-1.5 rounded-full transition-colors ${myOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
               自分のみ
             </button>
-            <button
-              onClick={() => setMyOnly(false)}
-              className={`px-3 py-1.5 rounded-full transition-colors ${!myOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
-            >
+            <button onClick={() => setMyOnly(false)} className={`px-3 py-1.5 rounded-full transition-colors ${!myOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
               全タスク
             </button>
           </div>
@@ -277,11 +300,11 @@ export default function TasksPage() {
 
       {/* 並び替え */}
       {tasks.length > 1 && (
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm flex-wrap">
           <span className="text-gray-400 text-xs font-medium flex items-center gap-1">
             <ArrowUpDown size={13} />並び替え
           </span>
-          {([['created_at', '登録日'], ['due_date', '期日'], ['status', 'ステータス']] as [SortKey, string][]).map(([key, label]) => {
+          {([['created_at', '登録日'], ['due_date', '期日'], ['priority', '優先度'], ['status', 'ステータス']] as [SortKey, string][]).map(([key, label]) => {
             const active = sortKey === key
             return (
               <button
@@ -313,6 +336,7 @@ export default function TasksPage() {
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <PriorityBadge priority={task.priority} />
                     <StatusBadge type="task" status={task.status} />
                     {task.due_date && (
                       <span className="text-xs text-gray-400">期日: {task.due_date}</span>
@@ -337,18 +361,10 @@ export default function TasksPage() {
                     <option value="cancelled">キャンセル</option>
                   </select>
                   <div className="flex gap-1">
-                    <button
-                      onClick={() => openEdit(task)}
-                      className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-                      title="編集"
-                    >
+                    <button onClick={() => openEdit(task)} className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors" title="編集">
                       <Pencil size={14} />
                     </button>
-                    <button
-                      onClick={() => handleDelete(task)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="削除"
-                    >
+                    <button onClick={() => handleDelete(task)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="削除">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -367,15 +383,7 @@ export default function TasksPage() {
               <h3 className="font-bold text-lg">タスクを追加</h3>
               <button onClick={() => { setShowModal(false); setFormError('') }} className="p-1 text-gray-400"><X size={20} /></button>
             </div>
-            <TaskForm
-              values={form}
-              onChange={setForm}
-              onSubmit={handleCreate}
-              onCancel={() => { setShowModal(false); setFormError('') }}
-              submitting={submitting}
-              error={formError}
-              isEdit={false}
-            />
+            <TaskForm values={form} onChange={setForm} onSubmit={handleCreate} onCancel={() => { setShowModal(false); setFormError('') }} submitting={submitting} error={formError} isEdit={false} />
           </div>
         </div>
       )}
@@ -388,15 +396,7 @@ export default function TasksPage() {
               <h3 className="font-bold text-lg">タスクを編集</h3>
               <button onClick={() => setEditTask(null)} className="p-1 text-gray-400"><X size={20} /></button>
             </div>
-            <TaskForm
-              values={editForm}
-              onChange={setEditForm}
-              onSubmit={handleEdit}
-              onCancel={() => setEditTask(null)}
-              submitting={editSubmitting}
-              error={editError}
-              isEdit={true}
-            />
+            <TaskForm values={editForm} onChange={setEditForm} onSubmit={handleEdit} onCancel={() => setEditTask(null)} submitting={editSubmitting} error={editError} isEdit={true} />
           </div>
         </div>
       )}

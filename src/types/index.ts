@@ -1,5 +1,6 @@
 export type UserRole = 'admin' | 'worker'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
+export type TaskPriority = 'high' | 'medium' | 'low'
 export type WorkLogStatus = 'draft' | 'submitted'
 export type PhotoType = 'before' | 'after'
 export type SiteStatus = 'active' | 'completed' | 'paused'
@@ -57,6 +58,7 @@ export interface Task {
   assigned_to: string | null
   created_by: string
   status: TaskStatus
+  priority: TaskPriority
   due_date: string | null
   created_at: string
   site?: Site
