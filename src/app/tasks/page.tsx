@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, X, ClipboardList, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -22,6 +22,7 @@ export default function TasksPage() {
   const [userId, setUserId] = useState('')
   const [filter, setFilter] = useState<TaskStatus | 'all'>('all')
   const [myOnly, setMyOnly] = useState(true)
+  const initialized = useRef(false)
 
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -44,9 +45,13 @@ export default function TasksPage() {
     if (!user) return
     setUserId(user.id)
 
-    const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user.id).single()
+    const { data: profile } = await supabase.from('profiles').select('organization_id, role').eq('id', user.id).single()
     if (!profile) return
     setOrgId(profile.organization_id)
+    if (!initialized.current) {
+      setMyOnly(profile.role !== 'admin')
+      initialized.current = true
+    }
 
     const [{ data: taskData }, { data: siteData }, { data: workerData }] = await Promise.all([
       supabase.from('tasks')
