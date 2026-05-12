@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { FileText, ChevronRight } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
@@ -28,11 +28,21 @@ interface Props {
 }
 
 export default function ReportsClient({ logs, workers, isAdmin }: Props) {
-  const [selectedWorker, setSelectedWorker] = useState<string>('all')
+  const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM
 
-  const filtered = selectedWorker === 'all'
-    ? logs
-    : logs.filter(l => l.worker_id === selectedWorker)
+  const [selectedWorker, setSelectedWorker] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth)
+
+  // ログに含まれる月の一覧（降順）
+  const months = useMemo(() => {
+    const set = new Set(logs.map(l => l.work_date.slice(0, 7)))
+    if (!set.has(currentMonth)) set.add(currentMonth)
+    return [...set].sort((a, b) => b.localeCompare(a))
+  }, [logs])
+
+  const filtered = logs
+    .filter(l => selectedMonth === 'all' || l.work_date.startsWith(selectedMonth))
+    .filter(l => selectedWorker === 'all' || l.worker_id === selectedWorker)
 
   const grouped: Record<string, Log[]> = {}
   filtered.forEach(log => {
@@ -40,24 +50,45 @@ export default function ReportsClient({ logs, workers, isAdmin }: Props) {
     grouped[log.work_date]!.push(log)
   })
 
+  const selectClass = "text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+
+  const formatMonth = (ym: string) => {
+    const [y, m] = ym.split('-')
+    return `${y}年${parseInt(m)}月`
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <h1 className="text-2xl font-black text-gray-900">
           {isAdmin ? '日報管理' : '日報一覧'}
         </h1>
-        {isAdmin && workers.length > 0 && (
+        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+          {/* 年月フィルター */}
           <select
-            value={selectedWorker}
-            onChange={e => setSelectedWorker(e.target.value)}
-            className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 flex-shrink-0"
+            value={selectedMonth}
+            onChange={e => setSelectedMonth(e.target.value)}
+            className={selectClass}
           >
-            <option value="all">全て表示</option>
-            {workers.map(w => (
-              <option key={w.id} value={w.id}>{w.full_name}</option>
+            {months.map(m => (
+              <option key={m} value={m}>{formatMonth(m)}</option>
             ))}
           </select>
-        )}
+
+          {/* スタッフフィルター（管理者のみ） */}
+          {isAdmin && workers.length > 0 && (
+            <select
+              value={selectedWorker}
+              onChange={e => setSelectedWorker(e.target.value)}
+              className={selectClass}
+            >
+              <option value="all">全スタッフ</option>
+              {workers.map(w => (
+                <option key={w.id} value={w.id}>{w.full_name}</option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {!filtered.length ? (
@@ -66,7 +97,7 @@ export default function ReportsClient({ logs, workers, isAdmin }: Props) {
           <p className="text-gray-500">日報がありません</p>
         </div>
       ) : (
-        Object.entries(grouped).map(([date, dayLogs]) => (
+        Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a)).map(([date, dayLogs]) => (
           <div key={date} className="card">
             <h2 className="font-bold text-gray-700 mb-3 text-sm">
               {new Date(date + 'T00:00:00').toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
