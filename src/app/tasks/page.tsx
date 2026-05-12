@@ -19,6 +19,7 @@ export default function TasksPage() {
     title: '', description: '', site_id: '', assigned_to: '', status: 'pending' as TaskStatus, due_date: '',
   })
   const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
 
   const load = useCallback(async () => {
     const supabase = createClient()
@@ -49,6 +50,17 @@ export default function TasksPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
+    setFormError('')
+
+    if (!orgId || !userId) {
+      setFormError('読み込み中です。しばらく待ってから再試行してください。')
+      return
+    }
+    if (!form.site_id) {
+      setFormError('現場を選択してください。')
+      return
+    }
+
     setSubmitting(true)
     const supabase = createClient()
     const { error } = await supabase.from('tasks').insert({
@@ -61,7 +73,9 @@ export default function TasksPage() {
       due_date: form.due_date || null,
       created_by: userId,
     })
-    if (!error) {
+    if (error) {
+      setFormError('追加に失敗しました: ' + error.message)
+    } else {
       setShowModal(false)
       setForm({ title: '', description: '', site_id: '', assigned_to: '', status: 'pending', due_date: '' })
       load()
@@ -158,8 +172,11 @@ export default function TasksPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-lg">タスクを追加</h3>
-              <button onClick={() => setShowModal(false)} className="p-1 text-gray-400"><X size={20} /></button>
+              <button onClick={() => { setShowModal(false); setFormError('') }} className="p-1 text-gray-400"><X size={20} /></button>
             </div>
+            {formError && (
+              <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2 mb-3">{formError}</p>
+            )}
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">タスク名 <span className="text-red-500">*</span></label>
