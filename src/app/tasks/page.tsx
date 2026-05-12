@@ -21,6 +21,7 @@ export default function TasksPage() {
   const [orgId, setOrgId] = useState('')
   const [userId, setUserId] = useState('')
   const [filter, setFilter] = useState<TaskStatus | 'all'>('all')
+  const [myOnly, setMyOnly] = useState(true)
 
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -149,7 +150,9 @@ export default function TasksPage() {
     }
   }
 
-  const base = filter === 'all' ? tasks : tasks.filter(t => t.status === filter)
+  const base = tasks
+    .filter(t => !myOnly || t.assigned_to === userId)
+    .filter(t => filter === 'all' || t.status === filter)
   const sorted = [...base].sort((a, b) => {
     let cmp = 0
     if (sortKey === 'due_date') {
@@ -230,10 +233,26 @@ export default function TasksPage() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-black text-gray-900">タスク管理</h1>
-        <button onClick={() => { setShowModal(true); setFormError('') }} className="btn-primary flex items-center gap-2 py-2">
-          <Plus size={18} />
-          <span className="hidden sm:inline">タスク追加</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-gray-100 rounded-full p-0.5 text-sm font-medium">
+            <button
+              onClick={() => setMyOnly(true)}
+              className={`px-3 py-1.5 rounded-full transition-colors ${myOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+            >
+              自分のみ
+            </button>
+            <button
+              onClick={() => setMyOnly(false)}
+              className={`px-3 py-1.5 rounded-full transition-colors ${!myOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+            >
+              全タスク
+            </button>
+          </div>
+          <button onClick={() => { setShowModal(true); setFormError('') }} className="btn-primary flex items-center gap-2 py-2">
+            <Plus size={18} />
+            <span className="hidden sm:inline">タスク追加</span>
+          </button>
+        </div>
       </div>
 
       {/* フィルター */}
