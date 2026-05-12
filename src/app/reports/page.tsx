@@ -33,6 +33,8 @@ export default async function ReportsPage() {
       logs={(logs ?? []) as any}
       workers={workers ?? []}
       isAdmin={profile.role === 'admin'}
+      orgId={profile.organization_id}
+      currentUserId={profile.id}
     />
   )
 }
