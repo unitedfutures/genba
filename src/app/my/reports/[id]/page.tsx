@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from '@/lib/supabase/actions'
 import { redirect } from 'next/navigation'
-import AppLayout from '@/components/layout/AppLayout'
 import WorkLogForm from './WorkLogForm'
 
 export default async function MyReportEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -34,12 +33,10 @@ export default async function MyReportEditPage({ params }: { params: Promise<{ i
   )
 
   return (
-    <AppLayout>
-      <WorkLogForm
-        log={{ ...log, photos: photosWithUrls, comments: comments ?? [] }}
-        profile={profile}
-        sites={sites ?? []}
-      />
-    </AppLayout>
+    <WorkLogForm
+      log={{ ...log, photos: photosWithUrls, comments: comments ?? [] }}
+      profile={profile}
+      sites={sites ?? []}
+    />
   )
 }
