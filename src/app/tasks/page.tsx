@@ -33,7 +33,7 @@ export default function TasksPage() {
 
     const [{ data: taskData }, { data: siteData }, { data: workerData }] = await Promise.all([
       supabase.from('tasks')
-        .select('*, site:sites(name), assignee:profiles(full_name)')
+        .select('*, site:sites!site_id(name), assignee:profiles!assigned_to(full_name)')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false }),
       supabase.from('sites').select('id, name').eq('organization_id', profile.organization_id).eq('status', 'active'),
