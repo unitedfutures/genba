@@ -14,11 +14,14 @@ export default function StaffPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [myOrgId, setMyOrgId] = useState('')
+  const [myUserId, setMyUserId] = useState('')
+  const [togglingId, setTogglingId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+    setMyUserId(user.id)
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -82,6 +85,17 @@ export default function StaffPage() {
     load()
   }
 
+  async function handleRoleToggle(profileId: string, currentRole: string) {
+    const newRole = currentRole === 'admin' ? 'worker' : 'admin'
+    const label = newRole === 'admin' ? '管理者' : '作業者'
+    if (!confirm(`権限を「${label}」に変更しますか？`)) return
+    setTogglingId(profileId)
+    const supabase = createClient()
+    await supabase.from('profiles').update({ role: newRole }).eq('id', profileId)
+    setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, role: newRole as 'admin' | 'worker' } : p))
+    setTogglingId(null)
+  }
+
   const roleLabel = (role: string) => role === 'admin' ? '管理者' : '作業者'
   const roleIcon = (role: string) => role === 'admin'
     ? <Shield size={14} className="text-orange-500" />
@@ -119,10 +133,22 @@ export default function StaffPage() {
                   <p className="font-medium text-gray-900">{p.full_name}</p>
                   <p className="text-xs text-gray-500">{p.phone}</p>
                 </div>
-                <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
-                  {roleIcon(p.role)}
-                  <span className="text-xs font-medium text-gray-700">{roleLabel(p.role)}</span>
-                </div>
+                {p.id === myUserId ? (
+                  <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
+                    {roleIcon(p.role)}
+                    <span className="text-xs font-medium text-gray-700">{roleLabel(p.role)}</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleRoleToggle(p.id, p.role)}
+                    disabled={togglingId === p.id}
+                    title="クリックして権限を変更"
+                    className="flex items-center gap-1 bg-gray-100 hover:bg-orange-50 hover:border-orange-300 border border-transparent px-2 py-1 rounded-full transition-colors disabled:opacity-50"
+                  >
+                    {roleIcon(p.role)}
+                    <span className="text-xs font-medium text-gray-700">{togglingId === p.id ? '...' : roleLabel(p.role)}</span>
+                  </button>
+                )}
               </div>
             ))}
           </div>
