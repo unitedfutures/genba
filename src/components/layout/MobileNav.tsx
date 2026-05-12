@@ -15,6 +15,7 @@ const adminNav = [
 
 const workerNav = [
   { href: '/my', label: 'TOP', icon: LayoutDashboard },
+  { href: '/tasks', label: 'タスク', icon: ClipboardList },
   { href: '/my/clock', label: '打刻', icon: Clock },
   { href: '/my/reports', label: '日報', icon: FileText },
 ]
