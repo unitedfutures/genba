@@ -17,7 +17,7 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ id:
   const [{ data: site }, { data: tasks }] = await Promise.all([
     supabase.from('sites').select('*').eq('id', id).single(),
     supabase.from('tasks')
-      .select('*, assignee:profiles(full_name)')
+      .select('*, assignee:profiles!assigned_to(full_name)')
       .eq('site_id', id)
       .order('created_at', { ascending: false }),
   ])
