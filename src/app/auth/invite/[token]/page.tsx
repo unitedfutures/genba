@@ -25,13 +25,18 @@ export default function InvitePage() {
 
   useEffect(() => {
     async function fetchInvitation() {
-      const res = await fetch(`/api/invitations/${token}`)
-      if (!res.ok) {
-        setError('招待リンクが無効または期限切れです')
-      } else {
-        setInvitation(await res.json())
+      try {
+        const res = await fetch(`/api/invitations/${token}`)
+        if (!res.ok) {
+          setError('招待リンクが無効または期限切れです')
+        } else {
+          setInvitation(await res.json())
+        }
+      } catch {
+        setError('招待リンクの読み込みに失敗しました')
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchInvitation()
   }, [token])
