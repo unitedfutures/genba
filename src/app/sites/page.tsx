@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MapPin, Plus, X, ChevronRight, Pencil, Trash2 } from 'lucide-react'
+import { MapPin, Plus, X, ChevronRight, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import type { Site } from '@/types'
@@ -22,6 +22,12 @@ export default function SitesPage() {
   const [editSite, setEditSite] = useState<Site | null>(null)
   const [editForm, setEditForm] = useState({ name: '', address: '' })
   const [editSubmitting, setEditSubmitting] = useState(false)
+
+  // 並び替え
+  type SortKey = 'created_at' | 'name' | 'status'
+  type SortDir = 'asc' | 'desc'
+  const [sortKey, setSortKey] = useState<SortKey>('created_at')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
 
   const load = useCallback(async () => {
     const supabase = createClient()
@@ -90,10 +96,33 @@ export default function SitesPage() {
     load()
   }
 
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const statusOrder: Record<string, number> = { active: 0, paused: 1, completed: 2 }
+
+  const sorted = [...sites].sort((a, b) => {
+    let cmp = 0
+    if (sortKey === 'name') {
+      cmp = a.name.localeCompare(b.name, 'ja')
+    } else if (sortKey === 'status') {
+      cmp = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)
+    } else {
+      cmp = a.created_at.localeCompare(b.created_at)
+    }
+    return sortDir === 'asc' ? cmp : -cmp
+  })
+
   const grouped = {
-    active:    sites.filter(s => s.status === 'active'),
-    paused:    sites.filter(s => s.status === 'paused'),
-    completed: sites.filter(s => s.status === 'completed'),
+    active:    sorted.filter(s => s.status === 'active'),
+    paused:    sorted.filter(s => s.status === 'paused'),
+    completed: sorted.filter(s => s.status === 'completed'),
   }
 
   const SiteRow = ({ site }: { site: Site }) => (
@@ -142,6 +171,35 @@ export default function SitesPage() {
           <span className="hidden sm:inline">現場を追加</span>
         </button>
       </div>
+
+      {/* 並び替えバー */}
+      {sites.length > 1 && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-400 text-xs font-medium flex items-center gap-1">
+            <ArrowUpDown size={13} />並び替え
+          </span>
+          {([ ['created_at', '登録日'], ['name', '現場名'], ['status', 'ステータス'] ] as [SortKey, string][]).map(([key, label]) => {
+            const active = sortKey === key
+            return (
+              <button
+                key={key}
+                onClick={() => toggleSort(key)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full border transition-colors ${
+                  active
+                    ? 'bg-orange-500 text-white border-orange-500'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {label}
+                {active && (sortDir === 'asc'
+                  ? <ArrowUp size={12} />
+                  : <ArrowDown size={12} />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-gray-400 text-center py-8">読み込み中...</p>
