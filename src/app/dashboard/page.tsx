@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from '@/lib/supabase/actions'
 import { redirect } from 'next/navigation'
-import { Users, MapPin, ClipboardList, FileText, Clock } from 'lucide-react'
+import { Users, MapPin, ClipboardList, FileText, Clock, LogIn, LogOut } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 
@@ -92,12 +92,27 @@ export default async function DashboardPage() {
                   <p className="font-medium text-gray-900 text-sm truncate">{(log.worker as any)?.full_name}</p>
                   <p className="text-xs text-gray-500 truncate">{(log.site as any)?.name}</p>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <StatusBadge type="worklog" status={log.status} />
+                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-1">
+                    <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                      log.clock_in_at
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}>
+                      <LogIn size={11} />開始
+                    </span>
+                    <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                      log.clock_out_at
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}>
+                      <LogOut size={11} />終了
+                    </span>
+                  </div>
                   {log.clock_in_at && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
-                      {log.clock_out_at ? new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : ''}
+                    <p className="text-xs text-gray-400">
+                      {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                      {log.clock_out_at ? `〜${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}` : '〜'}
                     </p>
                   )}
                 </div>
