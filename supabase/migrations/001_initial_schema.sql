@@ -249,3 +249,20 @@ create or replace trigger on_auth_user_created
 -- bucket name: work-photos
 -- public: false
 -- ============================================================
+
+-- Storage policies (work-photos バケット)
+-- ダッシュボードのSQL Editorで実行してください
+create policy "auth_users_can_upload"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'work-photos');
+
+create policy "auth_users_can_read"
+on storage.objects for select
+to authenticated
+using (bucket_id = 'work-photos');
+
+create policy "auth_users_can_delete"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'work-photos');
