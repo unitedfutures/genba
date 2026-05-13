@@ -37,6 +37,7 @@ export default async function MyReportEditPage({ params }: { params: Promise<{ i
       log={{ ...log, photos: photosWithUrls, comments: comments ?? [] }}
       profile={profile}
       sites={sites ?? []}
+      plan={(profile.organization as any)?.plan ?? 'free'}
     />
   )
 }

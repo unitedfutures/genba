@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin } from 'lucide-react'
+import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin, Lock } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import type { Profile } from '@/types'
@@ -12,9 +12,10 @@ interface Props {
   log: any
   profile: Profile
   sites: { id: string; name: string }[]
+  plan: string
 }
 
-export default function WorkLogForm({ log, profile, sites }: Props) {
+export default function WorkLogForm({ log, profile, sites, plan }: Props) {
   const router = useRouter()
   const [description, setDescription] = useState(log.work_description ?? '')
   const [workerComment, setWorkerComment] = useState(log.worker_comment ?? '')
@@ -198,22 +199,31 @@ export default function WorkLogForm({ log, profile, sites }: Props) {
             ))}
           </div>
         )}
-        <input
-          ref={beforeInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={e => handlePhotoUpload(e, 'before')}
-        />
-        <button
-          onClick={() => beforeInputRef.current?.click()}
-          disabled={uploading}
-          className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-        >
-          <Camera size={20} />
-          {uploading ? 'アップロード中...' : '写真を追加'}
-        </button>
+        {plan === 'free' ? (
+          <Link href="/#pricing" className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400">
+            <Lock size={16} className="text-orange-400" />
+            <span className="text-sm">写真添付はTEAMプランで利用できます</span>
+          </Link>
+        ) : (
+          <>
+            <input
+              ref={beforeInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={e => handlePhotoUpload(e, 'before')}
+            />
+            <button
+              onClick={() => beforeInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
+            >
+              <Camera size={20} />
+              {uploading ? 'アップロード中...' : '写真を追加'}
+            </button>
+          </>
+        )}
       </div>
 
       {/* After photos */}
@@ -232,22 +242,31 @@ export default function WorkLogForm({ log, profile, sites }: Props) {
             ))}
           </div>
         )}
-        <input
-          ref={afterInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={e => handlePhotoUpload(e, 'after')}
-        />
-        <button
-          onClick={() => afterInputRef.current?.click()}
-          disabled={uploading}
-          className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-        >
-          <Camera size={20} />
-          {uploading ? 'アップロード中...' : '写真を追加'}
-        </button>
+        {plan === 'free' ? (
+          <Link href="/#pricing" className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400">
+            <Lock size={16} className="text-orange-400" />
+            <span className="text-sm">写真添付はTEAMプランで利用できます</span>
+          </Link>
+        ) : (
+          <>
+            <input
+              ref={afterInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={e => handlePhotoUpload(e, 'after')}
+            />
+            <button
+              onClick={() => afterInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
+            >
+              <Camera size={20} />
+              {uploading ? 'アップロード中...' : '写真を追加'}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Comments */}
