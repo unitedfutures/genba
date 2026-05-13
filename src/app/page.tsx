@@ -681,7 +681,7 @@ export default async function LandingPage() {
             {[
               { step: '01', title: 'アカウント登録', body: 'メールアドレスとパスワードで登録完了。組織名を設定するだけで準備OK。', time: '約2分' },
               { step: '02', title: 'スタッフを招待', body: 'メールアドレスを入力して招待リンクを送信。スタッフはリンクをクリックして参加。', time: '約1分/人' },
-              { step: '03', title: '翌日から現場管理', body: '現場を登録してタスクを作成。スタッフはスマホから打刻・日報を開始できます。', time: '設定 約5分' },
+              { step: '03', title: '今日から現場管理', body: '現場を登録してタスクを作成。スタッフはスマホから打刻・日報を開始できます。', time: '設定 約5分' },
             ].map(({ step, title, body, time }) => (
               <div key={step} className="bg-white rounded-2xl p-6 shadow-sm text-left relative">
                 <div className="text-4xl font-black text-orange-100 absolute top-4 right-4">{step}</div>
