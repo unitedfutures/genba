@@ -9,6 +9,12 @@ export default async function ReportsPage() {
 
   const supabase = await createClient()
 
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('plan')
+    .eq('id', profile.organization_id)
+    .single()
+
   const query = supabase
     .from('work_logs')
     .select('*, worker:profiles(full_name), site:sites(name)')
@@ -35,6 +41,7 @@ export default async function ReportsPage() {
       isAdmin={profile.role === 'admin'}
       orgId={profile.organization_id}
       currentUserId={profile.id}
+      plan={org?.plan ?? 'free'}
     />
   )
 }

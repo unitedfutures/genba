@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserPlus, Mail, Shield, HardHat, Trash2, X } from 'lucide-react'
+import { UserPlus, Mail, Shield, HardHat, Trash2, X, Lock } from 'lucide-react'
+import Link from 'next/link'
 import type { Profile, Invitation } from '@/types'
 
 export default function StaffPage() {
@@ -16,6 +17,7 @@ export default function StaffPage() {
   const [myOrgId, setMyOrgId] = useState('')
   const [myUserId, setMyUserId] = useState('')
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [plan, setPlan] = useState<string>('free')
 
   const load = useCallback(async () => {
     const supabase = createClient()
@@ -25,12 +27,13 @@ export default function StaffPage() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('organization_id')
+      .select('organization_id, organization:organizations(plan)')
       .eq('id', user.id)
       .single()
 
     if (!profile) return
     setMyOrgId(profile.organization_id)
+    setPlan((profile.organization as any)?.plan ?? 'free')
 
     const [{ data: staffList }, { data: inviteList }] = await Promise.all([
       supabase.from('profiles').select('*').eq('organization_id', profile.organization_id).order('created_at'),
@@ -105,11 +108,31 @@ export default function StaffPage() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-black text-gray-900">スタッフ管理</h1>
-        <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2 py-2">
-          <UserPlus size={18} />
-          <span className="hidden sm:inline">招待する</span>
-        </button>
+        {plan === 'free' ? (
+          <Link href="/#pricing" className="flex items-center gap-2 py-2 px-4 bg-orange-50 border border-orange-300 text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-100 transition-colors">
+            <Lock size={15} />
+            アップグレード
+          </Link>
+        ) : (
+          <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2 py-2">
+            <UserPlus size={18} />
+            <span className="hidden sm:inline">招待する</span>
+          </button>
+        )}
       </div>
+
+      {plan === 'free' && (
+        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
+          <Lock size={18} className="text-orange-500 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-bold text-orange-800 text-sm">スタッフ招待はTEAMプランで利用できます</p>
+            <p className="text-orange-700 text-xs mt-0.5">¥980/名/月〜。チームで使い始めると打刻・日報・タスク管理がより効果的になります。</p>
+          </div>
+          <Link href="/#pricing" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
+            プランを見る
+          </Link>
+        </div>
+      )}
 
       {/* Staff list */}
       <div className="card">

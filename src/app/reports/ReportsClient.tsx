@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { FileText, ChevronRight, Download, X, Printer } from 'lucide-react'
+import { FileText, ChevronRight, Download, X, Printer, Lock } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -28,6 +28,7 @@ interface Props {
   isAdmin: boolean
   orgId: string
   currentUserId: string
+  plan: string
 }
 
 // Generate last N months as YYYY-MM strings (descending)
@@ -51,7 +52,7 @@ function escapeCell(val: string) {
   return val
 }
 
-export default function ReportsClient({ logs, workers, isAdmin, orgId, currentUserId }: Props) {
+export default function ReportsClient({ logs, workers, isAdmin, orgId, currentUserId, plan }: Props) {
   const currentMonth = new Date().toISOString().slice(0, 7)
 
   // ---- List filters ----
@@ -198,13 +199,24 @@ export default function ReportsClient({ logs, workers, isAdmin, orgId, currentUs
             </select>
           )}
           {/* Export button */}
-          <button
-            onClick={() => setShowExport(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <Download size={15} />
-            出力
-          </button>
+          {plan === 'free' ? (
+            <Link
+              href="/#pricing"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-orange-200 bg-orange-50 text-sm font-medium text-orange-500 hover:bg-orange-100 transition-colors"
+              title="TEAMプランで利用できます"
+            >
+              <Lock size={15} />
+              出力
+            </Link>
+          ) : (
+            <button
+              onClick={() => setShowExport(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Download size={15} />
+              出力
+            </button>
+          )}
         </div>
       </div>
 

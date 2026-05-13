@@ -2,16 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MapPin, Plus, X, ChevronRight, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { MapPin, Plus, X, ChevronRight, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Lock } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import type { Site } from '@/types'
+
+const FREE_SITE_LIMIT = 2
 
 export default function SitesPage() {
   const [sites, setSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
   const [orgId, setOrgId] = useState('')
   const [userId, setUserId] = useState('')
+  const [plan, setPlan] = useState<string>('free')
 
   // 新規追加モーダル
   const [showAddModal, setShowAddModal] = useState(false)
@@ -35,9 +38,14 @@ export default function SitesPage() {
     if (!user) return
     setUserId(user.id)
 
-    const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user.id).single()
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id, organization:organizations(plan)')
+      .eq('id', user.id)
+      .single()
     if (!profile) return
     setOrgId(profile.organization_id)
+    setPlan((profile.organization as any)?.plan ?? 'free')
 
     const { data } = await supabase
       .from('sites')
@@ -162,15 +170,37 @@ export default function SitesPage() {
     </div>
   )
 
+  const atSiteLimit = plan === 'free' && sites.length >= FREE_SITE_LIMIT
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-black text-gray-900">現場管理</h1>
-        <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-2 py-2">
-          <Plus size={18} />
-          <span className="hidden sm:inline">現場を追加</span>
-        </button>
+        {atSiteLimit ? (
+          <Link href="/#pricing" className="flex items-center gap-2 py-2 px-4 bg-orange-50 border border-orange-300 text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-100 transition-colors">
+            <Lock size={15} />
+            アップグレード
+          </Link>
+        ) : (
+          <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-2 py-2">
+            <Plus size={18} />
+            <span className="hidden sm:inline">現場を追加</span>
+          </button>
+        )}
       </div>
+
+      {atSiteLimit && (
+        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
+          <Lock size={18} className="text-orange-500 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-bold text-orange-800 text-sm">現場数の上限に達しています</p>
+            <p className="text-orange-700 text-xs mt-0.5">無料プランでは現場を{FREE_SITE_LIMIT}件まで登録できます。3件目以降はTEAMプランへのアップグレードが必要です。</p>
+          </div>
+          <Link href="/#pricing" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
+            プランを見る
+          </Link>
+        </div>
+      )}
 
       {/* 並び替えバー */}
       {sites.length > 1 && (

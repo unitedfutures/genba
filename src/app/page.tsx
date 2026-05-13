@@ -3,7 +3,7 @@ import { getCurrentProfile } from '@/lib/supabase/actions'
 import {
   HardHat, CheckCircle2, Clock, ClipboardList, MapPin, Users,
   FileText, Download, ArrowRight, Smartphone, Shield, BarChart3,
-  Camera, MessageSquare, ChevronRight, Star,
+  Camera, MessageSquare, ChevronRight, Star, X,
 } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────
@@ -704,19 +704,22 @@ export default async function LandingPage() {
             <div className="border-2 border-gray-200 rounded-2xl p-6 text-left">
               <div className="font-bold text-gray-500 text-sm mb-1">FREE</div>
               <div className="text-3xl font-black text-gray-900 mb-1">¥0<span className="text-base font-normal text-gray-400"> / 月</span></div>
-              <p className="text-gray-400 text-xs mb-5">クレジットカード不要</p>
+              <p className="text-gray-400 text-xs mb-5">クレジットカード不要・管理者1名</p>
               <ul className="space-y-2 mb-6">
-                {[
-                  'ダッシュボード',
-                  '現場管理（複数対応）',
-                  'タスク管理（優先度・期限設定）',
-                  '打刻・日報（写真添付）',
-                  'スタッフ管理・招待機能',
-                  'PDF・CSVエクスポート',
-                ].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-gray-700">
-                    <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
-                    {f}
+                {([
+                  ['ダッシュボード', true],
+                  ['現場管理（2件まで）', true],
+                  ['タスク管理（優先度・期限設定）', true],
+                  ['打刻・日報（写真添付）', true],
+                  ['スタッフ招待・管理', false],
+                  ['PDF・CSVエクスポート', false],
+                ] as [string, boolean][]).map(([f, ok]) => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    {ok
+                      ? <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
+                      : <X size={14} className="text-gray-300 flex-shrink-0" />
+                    }
+                    <span className={ok ? 'text-gray-700' : 'text-gray-400'}>{f}</span>
                   </li>
                 ))}
               </ul>
@@ -724,30 +727,33 @@ export default async function LandingPage() {
                 無料で始める
               </Link>
             </div>
-            {/* Paid */}
+            {/* Team */}
             <div className="border-2 border-orange-400 rounded-2xl p-6 text-left relative overflow-hidden">
-              <div className="absolute top-3 right-3 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">近日公開</div>
-              <div className="font-bold text-orange-500 text-sm mb-1">BUSINESS</div>
-              <div className="text-3xl font-black text-gray-900 mb-1">準備中</div>
-              <p className="text-gray-400 text-xs mb-5">大規模現場・法人向け</p>
+              <div className="absolute top-3 right-3 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">おすすめ</div>
+              <div className="font-bold text-orange-500 text-sm mb-1">TEAM</div>
+              <div className="text-3xl font-black text-gray-900 mb-0.5">
+                ¥980<span className="text-base font-normal text-gray-400"> / 名 / 月</span>
+              </div>
+              <p className="text-gray-400 text-xs mb-5">管理者含む人数分 · 最低2名〜</p>
               <ul className="space-y-2 mb-6">
                 {[
                   'FREEプランのすべての機能',
-                  '大規模スタッフ数対応',
-                  '高度な分析・レポート機能',
-                  'カスタムブランディング',
-                  '優先サポート',
-                  'APIアクセス（予定）',
+                  '現場登録数 無制限',
+                  'スタッフ招待・管理',
+                  '権限管理（管理者 / 作業者）',
+                  'PDF・CSVエクスポート',
+                  '優先サポート（予定）',
                 ].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-                    <ChevronRight size={14} className="text-orange-400 flex-shrink-0" />
+                  <li key={f} className="flex items-center gap-2 text-sm text-gray-700">
+                    <CheckCircle2 size={14} className="text-orange-500 flex-shrink-0" />
                     {f}
                   </li>
                 ))}
               </ul>
-              <button className="w-full bg-orange-100 text-orange-600 font-bold py-3 rounded-xl cursor-default">
-                近日公開
-              </button>
+              <Link href="/auth/signup" className="block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors">
+                無料で試してみる
+              </Link>
+              <p className="text-center text-gray-400 text-[11px] mt-2">まずFREEで始めて、チームが増えたらアップグレード</p>
             </div>
           </div>
         </div>
