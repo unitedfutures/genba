@@ -5,7 +5,12 @@ import { Users, MapPin, ClipboardList, FileText, Clock, LogIn, LogOut } from 'lu
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgraded?: string }>
+}) {
+  const { upgraded } = await searchParams
   const profile = await getCurrentProfile()
   if (!profile) redirect('/auth/login')
 
@@ -54,6 +59,18 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-black text-gray-900">ダッシュボード</h1>
         <p className="text-gray-500 text-sm mt-1">{new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</p>
       </div>
+
+      {upgraded === '1' && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-lg">🎉</span>
+          </div>
+          <div>
+            <p className="font-bold text-green-800">TEAMプランへのアップグレードが完了しました！</p>
+            <p className="text-green-700 text-sm mt-0.5">スタッフ招待・写真添付・PDF/CSVエクスポートがご利用いただけます。</p>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

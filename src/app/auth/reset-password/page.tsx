@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { HardHat } from 'lucide-react'
 import Link from 'next/link'
 
@@ -16,13 +15,18 @@ export default function ResetPasswordPage() {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password/confirm`,
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        redirectTo: `${window.location.origin}/auth/reset-password/confirm`,
+      }),
     })
+    const data = await res.json()
 
-    if (error) {
-      setError('送信に失敗しました。メールアドレスをご確認ください。')
+    if (!res.ok) {
+      setError(data.error || '送信に失敗しました')
     } else {
       setSent(true)
     }

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { FileText, ChevronRight, Download, X, Printer, Lock } from 'lucide-react'
+import { FileText, ChevronRight, Download, X, Printer } from 'lucide-react'
+import UpgradeButton from '@/components/ui/UpgradeButton'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -200,14 +201,10 @@ export default function ReportsClient({ logs, workers, isAdmin, orgId, currentUs
           )}
           {/* Export button */}
           {plan === 'free' ? (
-            <Link
-              href="/#pricing"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-orange-200 bg-orange-50 text-sm font-medium text-orange-500 hover:bg-orange-100 transition-colors"
-              title="TEAMプランで利用できます"
-            >
-              <Lock size={15} />
-              出力
-            </Link>
+            <UpgradeButton
+              label="出力"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-orange-200 bg-orange-50 text-sm font-medium text-orange-500 hover:bg-orange-100 transition-colors disabled:opacity-60"
+            />
           ) : (
             <button
               onClick={() => setShowExport(true)}

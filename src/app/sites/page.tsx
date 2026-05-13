@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { MapPin, Plus, X, ChevronRight, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Lock } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
+import UpgradeButton from '@/components/ui/UpgradeButton'
 import type { Site } from '@/types'
 
 const FREE_SITE_LIMIT = 2
@@ -177,10 +178,7 @@ export default function SitesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-black text-gray-900">現場管理</h1>
         {atSiteLimit ? (
-          <Link href="/#pricing" className="flex items-center gap-2 py-2 px-4 bg-orange-50 border border-orange-300 text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-100 transition-colors">
-            <Lock size={15} />
-            アップグレード
-          </Link>
+          <UpgradeButton className="flex items-center gap-2 py-2 px-4 bg-orange-50 border border-orange-300 text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-100 transition-colors disabled:opacity-60" />
         ) : (
           <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-2 py-2">
             <Plus size={18} />

@@ -390,7 +390,7 @@ export default async function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
                 <HardHat size={12} />
-                建設・工事現場のデジタル管理
+                あらゆる現場の、タスクと進捗を一元管理
               </div>
               <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
                 現場の「今」を、<br />

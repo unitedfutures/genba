@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff } from 'lucide-react'
+import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff, CreditCard, Loader2, Crown } from 'lucide-react'
 import { signOut } from '@/lib/supabase/actions'
+import UpgradeButton from '@/components/ui/UpgradeButton'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
   const [form, setForm] = useState({ full_name: '', phone: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  const [plan, setPlan] = useState<'free' | 'paid' | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   const [pwForm, setPwForm] = useState({ password: '', confirm: '' })
   const [showPw, setShowPw] = useState(false)
@@ -24,12 +28,13 @@ export default function ProfilePage() {
       if (!user) return
       const { data } = await supabase
         .from('profiles')
-        .select('*, organization:organizations(name)')
+        .select('*, organization:organizations(name, plan)')
         .eq('id', user.id)
         .single()
       if (data) {
         setProfile(data)
         setForm({ full_name: data.full_name ?? '', phone: data.phone ?? '' })
+        setPlan(data.organization?.plan ?? 'free')
       }
     }
     load()
@@ -74,6 +79,14 @@ export default function ProfilePage() {
     setPwSaving(false)
   }
 
+  async function handlePortal() {
+    setPortalLoading(true)
+    const res = await fetch('/api/stripe/portal', { method: 'POST' })
+    const { url, error } = await res.json()
+    if (url) window.location.href = url
+    else { alert(error || 'エラーが発生しました'); setPortalLoading(false) }
+  }
+
   const roleLabel = profile?.role === 'admin' ? '管理者' : '作業者'
 
   return (
@@ -93,6 +106,45 @@ export default function ProfilePage() {
         <p className="text-sm text-gray-500">{roleLabel}</p>
         <p className="text-xs text-gray-400 mt-1">{profile?.organization?.name}</p>
       </div>
+
+      {/* Plan */}
+      {plan !== null && (
+        <div className="card">
+          <h2 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
+            <CreditCard size={18} className="text-gray-500" />
+            ご利用プラン
+          </h2>
+          <div className={`flex items-center gap-3 rounded-xl px-4 py-3 mb-4 ${plan === 'paid' ? 'bg-amber-50 border border-amber-200' : 'bg-gray-50 border border-gray-200'}`}>
+            {plan === 'paid' ? (
+              <Crown size={20} className="text-amber-500 shrink-0" />
+            ) : (
+              <CreditCard size={20} className="text-gray-400 shrink-0" />
+            )}
+            <div>
+              <p className={`font-bold ${plan === 'paid' ? 'text-amber-700' : 'text-gray-700'}`}>
+                {plan === 'paid' ? 'TEAMプラン' : 'FREEプラン'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {plan === 'paid' ? '¥980 / 名 / 月' : '無料・機能制限あり'}
+              </p>
+            </div>
+          </div>
+          {profile?.role === 'admin' && (
+            plan === 'paid' ? (
+              <button
+                onClick={handlePortal}
+                disabled={portalLoading}
+                className="w-full py-3 rounded-xl font-bold border-2 border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              >
+                {portalLoading ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
+                {portalLoading ? '移動中...' : 'サブスクリプションを管理'}
+              </button>
+            ) : (
+              <UpgradeButton className="w-full" label="TEAMプランにアップグレード" />
+            )
+          )}
+        </div>
+      )}
 
       {/* Edit form */}
       <div className="card">

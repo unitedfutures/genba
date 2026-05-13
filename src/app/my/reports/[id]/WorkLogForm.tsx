@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin, Lock } from 'lucide-react'
+import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
+import UpgradeButton from '@/components/ui/UpgradeButton'
 import type { Profile } from '@/types'
 import { useRouter } from 'next/navigation'
 
@@ -200,10 +201,10 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
           </div>
         )}
         {plan === 'free' ? (
-          <Link href="/#pricing" className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400">
-            <Lock size={16} className="text-orange-400" />
-            <span className="text-sm">写真添付はTEAMプランで利用できます</span>
-          </Link>
+          <UpgradeButton
+            label="写真添付はTEAMプランで利用できます"
+            className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 text-sm disabled:opacity-60"
+          />
         ) : (
           <>
             <input
@@ -243,10 +244,10 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
           </div>
         )}
         {plan === 'free' ? (
-          <Link href="/#pricing" className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400">
-            <Lock size={16} className="text-orange-400" />
-            <span className="text-sm">写真添付はTEAMプランで利用できます</span>
-          </Link>
+          <UpgradeButton
+            label="写真添付はTEAMプランで利用できます"
+            className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 text-sm disabled:opacity-60"
+          />
         ) : (
           <>
             <input
