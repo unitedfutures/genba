@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from '@/lib/supabase/actions'
 import {
   LayoutDashboard, Users, MapPin, ClipboardList,
-  FileText, UserCircle, LogOut, HardHat, Clock
+  FileText, UserCircle, LogOut, Clock
 } from 'lucide-react'
 import type { Profile } from '@/types'
 
@@ -36,8 +37,7 @@ export default function Sidebar({ profile }: SidebarProps) {
     <aside className="hidden md:flex md:flex-col w-64 bg-gray-900 text-white min-h-screen">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
-        <HardHat className="text-orange-500" size={28} />
-        <span className="text-2xl font-black tracking-widest text-orange-500">GENBA</span>
+        <Image src="/logo/GENBA_logo_horizontal_white.png" alt="GENBA" width={140} height={50} className="object-contain" />
       </div>
 
       {/* Org name */}

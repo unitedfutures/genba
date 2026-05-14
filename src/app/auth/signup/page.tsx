@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { HardHat, Eye, EyeOff, Building2, User, Mail, Lock } from 'lucide-react'
+import { Eye, EyeOff, Building2, User, Mail, Lock } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function SignupPage() {
@@ -82,10 +83,7 @@ export default function SignupPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-2xl mb-4">
-            <HardHat className="text-white" size={32} />
-          </div>
-          <h1 className="text-4xl font-black tracking-widest text-orange-500">GENBA</h1>
+          <Image src="/logo/GENBA_logo_horizontal_white.png" alt="GENBA" width={200} height={72} className="mx-auto object-contain" />
           <p className="text-gray-400 mt-2 text-sm">現場タスク・進捗管理</p>
         </div>
 

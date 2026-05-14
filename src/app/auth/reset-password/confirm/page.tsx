@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { HardHat, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
+import Image from 'next/image'
 
 export default function ResetPasswordConfirmPage() {
   const router = useRouter()
@@ -53,10 +54,7 @@ export default function ResetPasswordConfirmPage() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-2xl mb-4">
-            <HardHat className="text-white" size={32} />
-          </div>
-          <h1 className="text-4xl font-black tracking-widest text-orange-500">GENBA</h1>
+          <Image src="/logo/GENBA_logo_horizontal_white.png" alt="GENBA" width={200} height={72} className="mx-auto object-contain" />
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-xl">

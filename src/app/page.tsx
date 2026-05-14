@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getCurrentProfile } from '@/lib/supabase/actions'
 import {
   HardHat, CheckCircle2, Clock, ClipboardList, MapPin, Users,
@@ -358,11 +359,8 @@ export default async function LandingPage() {
       {/* ── Navigation ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-              <HardHat size={16} className="text-white" />
-            </div>
-            <span className="font-black text-white tracking-widest text-lg">GENBA</span>
+          <div className="flex items-center">
+            <Image src="/logo/GENBA_logo_horizontal_white.png" alt="GENBA" width={120} height={43} className="object-contain" />
           </div>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
