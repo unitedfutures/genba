@@ -397,8 +397,8 @@ export default async function LandingPage() {
                 <span className="text-orange-400">瞬時に把握。</span>
               </h1>
               <p className="text-gray-300 text-lg leading-relaxed mb-8">
-                タスク・打刻・日報・スタッフ管理を<br className="hidden sm:block" />
-                ワンプラットフォームに集約。<br />
+                施設・店舗・支店・工事などの<br className="hidden sm:block" />
+                タスク・打刻・日報・スタッフ管理を集約。<br />
                 紙と電話から解放される、<strong className="text-white">現場管理の新標準</strong>。
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
