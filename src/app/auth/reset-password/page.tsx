@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Image src="/logo/GENBA_logo_horizontal_white.png" alt="GENBA" width={200} height={72} className="mx-auto object-contain" />
+          <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={200} height={72} className="mx-auto object-contain" />
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-xl">

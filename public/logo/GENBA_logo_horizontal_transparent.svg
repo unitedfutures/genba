@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -15 753 290" width="723" height="260">
+  <path d="M 191.1,202.8 A 95,95 0 1 1 212.3,82.5" fill="none" stroke="#ffffff" stroke-width="29" stroke-linecap="round"/>
+  <polyline points="83,140 113,168 179,102" fill="none" stroke="#f97316" stroke-width="22"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="269" y="138"
+    font-family="Arial Black, Arial, sans-serif"
+    font-weight="900" font-size="72" fill="#ffffff" letter-spacing="3">GENBA</text>
+  <text x="271" y="176"
+    font-family="Arial, sans-serif"
+    font-size="19" fill="#94a3b8" letter-spacing="8">FIELD TASK MANAGEMENT</text>
+</svg>
