@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   if (!email) return NextResponse.json({ error: 'メールアドレスを入力してください' }, { status: 400 })
 
   const admin = createAdminClient()
-  const { data } = await admin.auth.admin.listUsers()
+  const { data } = await admin.auth.admin.listUsers({ perPage: 1000 })
   const exists = data?.users?.some(u => u.email?.toLowerCase() === email.toLowerCase())
 
   if (!exists) {

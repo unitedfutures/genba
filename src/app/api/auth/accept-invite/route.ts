@@ -3,18 +3,18 @@ import { NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 
 export async function POST(request: Request) {
-  const { token, fullName, email, password, organizationId, role } = await request.json()
+  const { token, fullName, email, password } = await request.json()
 
-  if (!token || !fullName || !email || !password || !organizationId) {
+  if (!token || !fullName || !email || !password) {
     return NextResponse.json({ error: '必要な情報が不足しています' }, { status: 400 })
   }
 
   const admin = createAdminClient()
 
-  // 招待を再確認（改ざん防止）
+  // 招待を再確認（改ざん防止）- organization_id と role は招待データから取得
   const { data: invitation } = await admin
     .from('invitations')
-    .select('id')
+    .select('id, organization_id, role, email')
     .eq('token', token)
     .is('accepted_at', null)
     .gt('expires_at', new Date().toISOString())
@@ -24,6 +24,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '招待リンクが無効または期限切れです' }, { status: 404 })
   }
 
+  // 招待メールアドレスと一致するか確認
+  if (invitation.email.toLowerCase() !== email.toLowerCase()) {
+    return NextResponse.json({ error: '招待されたメールアドレスと一致しません' }, { status: 403 })
+  }
+
+  // organization_id と role は招待データを信頼（クライアント送信値は使わない）
+  const organizationId = invitation.organization_id
+  const role = invitation.role
+
   // ユーザーを作成（メール確認不要）
   const { data: userData, error: userError } = await admin.auth.admin.createUser({
     email,
@@ -32,7 +41,7 @@ export async function POST(request: Request) {
     user_metadata: {
       full_name: fullName,
       organization_id: organizationId,
-      role: role ?? 'worker',
+      role,
       invitation_token: token,
     },
   })
