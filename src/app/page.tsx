@@ -756,8 +756,8 @@ export default async function LandingPage() {
       {/* ── Final CTA ── */}
       <section className="py-20 px-5 bg-gray-900 text-center">
         <div className="max-w-xl mx-auto">
-          <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <HardHat size={28} className="text-white" />
+          <div className="flex justify-center mb-6">
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={160} height={58} className="object-contain" />
           </div>
           <h2 className="text-3xl font-black text-white mb-4">
             今日から、現場管理を変えよう。
