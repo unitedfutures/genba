@@ -48,9 +48,8 @@ function DashboardMockup() {
       <div className="flex h-[340px] text-[11px]">
         {/* Sidebar */}
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
-          <div className="px-3 mb-2 flex items-center gap-1.5">
-            <HardHat size={14} className="text-orange-400" />
-            <span className="font-black text-orange-400 tracking-widest text-[11px]">GENBA</span>
+          <div className="px-3 mb-2">
+            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード', active: true },
@@ -126,9 +125,8 @@ function TaskMockup() {
     <BrowserFrame>
       <div className="flex h-[320px] text-[11px]">
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
-          <div className="px-3 mb-2 flex items-center gap-1.5">
-            <HardHat size={14} className="text-orange-400" />
-            <span className="font-black text-orange-400 tracking-widest text-[11px]">GENBA</span>
+          <div className="px-3 mb-2">
+            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード' },
@@ -224,9 +222,8 @@ function ReportsMockup() {
     <BrowserFrame>
       <div className="flex h-[300px] text-[11px]">
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
-          <div className="px-3 mb-2 flex items-center gap-1.5">
-            <HardHat size={14} className="text-orange-400" />
-            <span className="font-black text-orange-400 tracking-widest text-[11px]">GENBA</span>
+          <div className="px-3 mb-2">
+            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード' },
@@ -298,9 +295,8 @@ function StaffMockup() {
     <BrowserFrame>
       <div className="flex h-[280px] text-[11px]">
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
-          <div className="px-3 mb-2 flex items-center gap-1.5">
-            <HardHat size={14} className="text-orange-400" />
-            <span className="font-black text-orange-400 tracking-widest text-[11px]">GENBA</span>
+          <div className="px-3 mb-2">
+            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード' },
