@@ -22,7 +22,10 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
   const [workerComment, setWorkerComment] = useState(log.worker_comment ?? '')
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [photos, setPhotos] = useState<any[]>(log.photos ?? [])
+  const [uploadError, setUploadError] = useState('')
+  const [commentError, setCommentError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [comments, setComments] = useState<any[]>(log.comments ?? [])
   const [newComment, setNewComment] = useState('')
@@ -33,15 +36,18 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
   async function handleSave(status?: 'draft' | 'submitted') {
     const isSub = status === 'submitted'
     isSub ? setSubmitting(true) : setSaving(true)
+    setSaveError('')
 
     const supabase = createClient()
-    await supabase.from('work_logs').update({
+    const { error } = await supabase.from('work_logs').update({
       work_description: description || null,
       worker_comment: workerComment || null,
       status: status ?? log.status,
     }).eq('id', log.id)
 
-    if (isSub) {
+    if (error) {
+      setSaveError(isSub ? '提出に失敗しました。もう一度お試しください。' : '保存に失敗しました。もう一度お試しください。')
+    } else if (isSub) {
       router.push('/my/reports')
     }
     isSub ? setSubmitting(false) : setSaving(false)
@@ -59,9 +65,10 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
     const ext = file.name.split('.').pop()
     const path = `${profile.organization_id}/${log.id}/${photoType}-${Date.now()}.${ext}`
 
-    const { error: uploadError } = await supabase.storage.from('work-photos').upload(path, file)
-    if (uploadError) {
-      alert('アップロードに失敗しました: ' + uploadError.message)
+    setUploadError('')
+    const { error: upErr } = await supabase.storage.from('work-photos').upload(path, file)
+    if (upErr) {
+      setUploadError('写真のアップロードに失敗しました。ファイルサイズや形式を確認してください。')
       setUploading(false)
       return
     }
@@ -97,7 +104,8 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
     if (!newComment.trim()) return
     setPostingComment(true)
     const supabase = createClient()
-    const { data } = await supabase.from('comments').insert({
+    setCommentError('')
+    const { data, error: cErr } = await supabase.from('comments').insert({
       work_log_id: log.id,
       author_id: profile.id,
       content: newComment.trim(),
@@ -105,6 +113,8 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
     if (data) {
       setComments(prev => [...prev, data])
       setNewComment('')
+    } else if (cErr) {
+      setCommentError('コメントの送信に失敗しました。')
     }
     setPostingComment(false)
   }
@@ -182,11 +192,13 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
         >
           {saving ? '保存中...' : '下書き保存'}
         </button>
+        {saveError && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{saveError}</p>}
       </div>
 
       {/* Before photos */}
       <div className="card">
         <h2 className="font-bold text-gray-900 mb-3">作業前写真</h2>
+        {uploadError && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-3">{uploadError}</p>}
         {beforePhotos.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-3">
             {beforePhotos.map(photo => (
@@ -297,6 +309,7 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
             ))
           )}
         </div>
+        {commentError && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-2">{commentError}</p>}
         <form onSubmit={postComment} className="flex gap-2">
           <input
             type="text"

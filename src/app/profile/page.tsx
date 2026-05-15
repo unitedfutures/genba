@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff, CreditCard, Loader2, Crown } from 'lucide-react'
+import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff, CreditCard, Loader2, Crown, X, AlertTriangle } from 'lucide-react'
 import { signOut } from '@/lib/supabase/actions'
 import UpgradeButton from '@/components/ui/UpgradeButton'
 
@@ -13,7 +13,13 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false)
 
   const [plan, setPlan] = useState<'free' | 'paid' | null>(null)
+  const [staffCount, setStaffCount] = useState(0)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [portalError, setPortalError] = useState('')
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState('')
+  const [cancelledUntil, setCancelledUntil] = useState('')
 
   const [pwForm, setPwForm] = useState({ password: '', confirm: '' })
   const [showPw, setShowPw] = useState(false)
@@ -35,6 +41,13 @@ export default function ProfilePage() {
         setProfile(data)
         setForm({ full_name: data.full_name ?? '', phone: data.phone ?? '', company_name: data.organization?.name ?? '' })
         setPlan(data.organization?.plan ?? 'free')
+        // 自分以外のスタッフ数を取得
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', data.organization_id)
+          .neq('id', user.id)
+        setStaffCount(count ?? 0)
       }
     }
     load()
@@ -73,7 +86,7 @@ export default function ProfilePage() {
     const supabase = createClient()
     const { error } = await supabase.auth.updateUser({ password: pwForm.password })
     if (error) {
-      setPwError('変更に失敗しました: ' + error.message)
+      setPwError('パスワードの変更に失敗しました。もう一度お試しください。')
     } else {
       setPwSaved(true)
       setPwForm({ password: '', confirm: '' })
@@ -84,10 +97,29 @@ export default function ProfilePage() {
 
   async function handlePortal() {
     setPortalLoading(true)
+    setPortalError('')
     const res = await fetch('/api/stripe/portal', { method: 'POST' })
     const { url, error } = await res.json()
-    if (url) window.location.href = url
-    else { alert(error || 'エラーが発生しました'); setPortalLoading(false) }
+    if (url) {
+      window.location.href = url
+    } else {
+      setPortalError(error || '決済管理ページへの遷移に失敗しました。')
+      setPortalLoading(false)
+    }
+  }
+
+  async function handleCancel() {
+    setCancelling(true)
+    setCancelError('')
+    const res = await fetch('/api/stripe/cancel', { method: 'POST' })
+    const { ok, periodEnd, error } = await res.json()
+    if (ok) {
+      setCancelledUntil(periodEnd)
+      setShowCancelModal(false)
+    } else {
+      setCancelError(error || '解約処理に失敗しました。もう一度お試しください。')
+    }
+    setCancelling(false)
   }
 
   const roleLabel = profile?.role === 'admin' ? '管理者' : '作業者'
@@ -132,16 +164,41 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
+          {cancelledUntil && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 mb-2 flex items-start gap-2">
+              <AlertTriangle size={16} className="text-yellow-600 shrink-0 mt-0.5" />
+              <p className="text-yellow-800 text-sm">解約手続きが完了しました。<span className="font-bold">{cancelledUntil}</span>まで引き続きご利用いただけます。</p>
+            </div>
+          )}
           {profile?.role === 'admin' && (
             plan === 'paid' ? (
-              <button
-                onClick={handlePortal}
-                disabled={portalLoading}
-                className="w-full py-3 rounded-xl font-bold border-2 border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-              >
-                {portalLoading ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
-                {portalLoading ? '移動中...' : 'サブスクリプションを管理'}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handlePortal}
+                  disabled={portalLoading}
+                  className="w-full py-3 rounded-xl font-bold border-2 border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {portalLoading ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
+                  {portalLoading ? '移動中...' : 'サブスクリプションを管理'}
+                </button>
+                {portalError && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{portalError}</p>}
+                {!cancelledUntil && (
+                  staffCount > 0 ? (
+                    <p className="text-xs text-gray-500 text-center py-2">
+                      解約するには先に
+                      <a href="/staff" className="text-orange-500 underline mx-1">スタッフ管理</a>
+                      でスタッフ（{staffCount}名）を全員削除してください
+                    </p>
+                  ) : (
+                    <button
+                      onClick={() => setShowCancelModal(true)}
+                      className="w-full py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 border border-red-200 font-medium transition-colors"
+                    >
+                      プランを解約する
+                    </button>
+                  )
+                )}
+              </div>
             ) : (
               <UpgradeButton className="w-full" label="TEAMプランにアップグレード" />
             )
@@ -264,6 +321,40 @@ export default function ProfilePage() {
           ログアウト
         </button>
       </form>
+
+      {/* Cancel modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg text-gray-900">プランの解約</h3>
+              <button onClick={() => setShowCancelModal(false)} className="p-1 text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 flex items-start gap-2">
+              <AlertTriangle size={16} className="text-red-500 shrink-0 mt-0.5" />
+              <p className="text-red-700 text-sm">解約すると、現在の請求期間終了後にフリープランへ移行します。スタッフ招待・写真添付などの機能が利用できなくなります。</p>
+            </div>
+            {cancelError && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2 mb-3">{cancelError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="flex-1 py-3 rounded-xl font-bold border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="flex-1 py-3 rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-50"
+              >
+                {cancelling ? '処理中...' : '解約する'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

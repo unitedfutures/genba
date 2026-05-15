@@ -82,7 +82,7 @@ export default function ClockPage() {
   }
 
   async function handleClockIn() {
-    if (!selectedSite) { alert('現場を選択してください'); return }
+    if (!selectedSite) return
     setTapping(true)
 
     const loc = await getLocation()

@@ -21,11 +21,16 @@ export default function SitesPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [addForm, setAddForm] = useState({ name: '', address: '' })
   const [addSubmitting, setAddSubmitting] = useState(false)
+  const [addError, setAddError] = useState('')
 
   // 編集モーダル
   const [editSite, setEditSite] = useState<Site | null>(null)
   const [editForm, setEditForm] = useState({ name: '', address: '' })
   const [editSubmitting, setEditSubmitting] = useState(false)
+  const [editError, setEditError] = useState('')
+
+  // 削除エラー
+  const [deleteError, setDeleteError] = useState('')
 
   // 並び替え
   type SortKey = 'created_at' | 'name' | 'status'
@@ -63,6 +68,7 @@ export default function SitesPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setAddSubmitting(true)
+    setAddError('')
     const supabase = createClient()
     const { error } = await supabase.from('sites').insert({
       organization_id: orgId,
@@ -75,6 +81,8 @@ export default function SitesPage() {
       setShowAddModal(false)
       setAddForm({ name: '', address: '' })
       load()
+    } else {
+      setAddError('現場の追加に失敗しました。もう一度お試しください。')
     }
     setAddSubmitting(false)
   }
@@ -88,21 +96,31 @@ export default function SitesPage() {
     e.preventDefault()
     if (!editSite) return
     setEditSubmitting(true)
+    setEditError('')
     const supabase = createClient()
-    await supabase.from('sites').update({
+    const { error } = await supabase.from('sites').update({
       name: editForm.name,
       address: editForm.address || null,
     }).eq('id', editSite.id)
-    setEditSite(null)
-    load()
+    if (!error) {
+      setEditSite(null)
+      load()
+    } else {
+      setEditError('更新に失敗しました。もう一度お試しください。')
+    }
     setEditSubmitting(false)
   }
 
   async function handleDelete(site: Site) {
     if (!confirm(`「${site.name}」を削除しますか？\n関連するタスクも削除されます。`)) return
+    setDeleteError('')
     const supabase = createClient()
-    await supabase.from('sites').delete().eq('id', site.id)
-    load()
+    const { error } = await supabase.from('sites').delete().eq('id', site.id)
+    if (!error) {
+      load()
+    } else {
+      setDeleteError(`「${site.name}」の削除に失敗しました。`)
+    }
   }
 
   function toggleSort(key: SortKey) {
@@ -186,6 +204,10 @@ export default function SitesPage() {
           </button>
         )}
       </div>
+
+      {deleteError && (
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{deleteError}</p>
+      )}
 
       {atSiteLimit && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
@@ -283,6 +305,7 @@ export default function SitesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">住所</label>
                 <input type="text" value={addForm.address} onChange={e => setAddForm(f => ({ ...f, address: e.target.value }))} className="input-field" placeholder="長野県原村..." />
               </div>
+              {addError && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{addError}</p>}
               <button type="submit" disabled={addSubmitting} className="btn-primary w-full disabled:opacity-50">
                 {addSubmitting ? '追加中...' : '追加する'}
               </button>
@@ -308,6 +331,7 @@ export default function SitesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">住所</label>
                 <input type="text" value={editForm.address} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))} className="input-field" placeholder="長野県原村..." />
               </div>
+              {editError && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{editError}</p>}
               <div className="flex gap-2">
                 <button type="button" onClick={() => setEditSite(null)} className="btn-secondary flex-1">
                   キャンセル

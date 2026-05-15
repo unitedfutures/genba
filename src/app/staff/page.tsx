@@ -15,9 +15,12 @@ export default function StaffPage() {
   const [form, setForm] = useState({ email: '', role: 'worker' as 'admin' | 'worker' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [inviteUrl, setInviteUrl] = useState('')
   const [myOrgId, setMyOrgId] = useState('')
   const [myUserId, setMyUserId] = useState('')
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState('')
   const [plan, setPlan] = useState<string>('free')
 
   const load = useCallback(async () => {
@@ -70,11 +73,11 @@ export default function StaffPage() {
     })
 
     if (insertError) {
-      setError('招待の作成に失敗しました: ' + insertError.message)
+      setError('招待の作成に失敗しました。もう一度お試しください。')
     } else {
-      const inviteUrl = `${window.location.origin}/auth/invite/${token}`
-      await navigator.clipboard.writeText(inviteUrl).catch(() => {})
-      alert(`招待リンクを作成しました。\n\n${inviteUrl}\n\nクリップボードにコピーしました。`)
+      const url = `${window.location.origin}/auth/invite/${token}`
+      await navigator.clipboard.writeText(url).catch(() => {})
+      setInviteUrl(url)
       setShowModal(false)
       setForm({ email: '', role: 'worker' })
       load()
@@ -87,6 +90,20 @@ export default function StaffPage() {
     const supabase = createClient()
     await supabase.from('invitations').delete().eq('id', id)
     load()
+  }
+
+  async function handleDeleteStaff(profileId: string, name: string) {
+    if (!confirm(`「${name}」を削除しますか？\nこの操作は元に戻せません。`)) return
+    setDeletingId(profileId)
+    setDeleteError('')
+    const res = await fetch(`/api/staff/${profileId}`, { method: 'DELETE' })
+    if (res.ok) {
+      load()
+    } else {
+      const { error } = await res.json()
+      setDeleteError(error || 'スタッフの削除に失敗しました。もう一度お試しください。')
+    }
+    setDeletingId(null)
   }
 
   async function handleRoleToggle(profileId: string, currentRole: string) {
@@ -118,6 +135,18 @@ export default function StaffPage() {
           </button>
         )}
       </div>
+
+      {deleteError && (
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{deleteError}</p>
+      )}
+
+      {inviteUrl && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
+          <p className="font-bold text-green-800 text-sm mb-1">招待リンクを作成しました（クリップボードにコピー済み）</p>
+          <p className="text-xs text-green-700 break-all font-mono">{inviteUrl}</p>
+          <button onClick={() => setInviteUrl('')} className="mt-2 text-xs text-green-600 underline">閉じる</button>
+        </div>
+      )}
 
       {plan === 'free' && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
@@ -167,15 +196,25 @@ export default function StaffPage() {
                     <span className="text-xs font-medium text-gray-700">{roleLabel(p.role)}</span>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => handleRoleToggle(p.id, p.role)}
-                    disabled={togglingId === p.id}
-                    title="クリックして権限を変更"
-                    className="flex items-center gap-1 bg-gray-100 hover:bg-orange-50 hover:border-orange-300 border border-transparent px-2 py-1 rounded-full transition-colors disabled:opacity-50"
-                  >
-                    {roleIcon(p.role)}
-                    <span className="text-xs font-medium text-gray-700">{togglingId === p.id ? '...' : roleLabel(p.role)}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleRoleToggle(p.id, p.role)}
+                      disabled={togglingId === p.id || deletingId === p.id}
+                      title="クリックして権限を変更"
+                      className="flex items-center gap-1 bg-gray-100 hover:bg-orange-50 hover:border-orange-300 border border-transparent px-2 py-1 rounded-full transition-colors disabled:opacity-50"
+                    >
+                      {roleIcon(p.role)}
+                      <span className="text-xs font-medium text-gray-700">{togglingId === p.id ? '...' : roleLabel(p.role)}</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStaff(p.id, p.full_name)}
+                      disabled={deletingId === p.id}
+                      title="スタッフを削除"
+                      className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === p.id ? <span className="text-xs text-gray-400">削除中...</span> : <Trash2 size={15} />}
+                    </button>
+                  </div>
                 )}
               </div>
             ))}

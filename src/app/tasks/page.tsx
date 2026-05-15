@@ -98,7 +98,7 @@ export default function TasksPage() {
       created_by: userId,
     })
     if (error) {
-      setFormError('追加に失敗しました: ' + error.message)
+      setFormError('タスクの追加に失敗しました。もう一度お試しください。')
     } else {
       setShowModal(false)
       setForm(emptyForm)
@@ -137,7 +137,7 @@ export default function TasksPage() {
       due_date: editForm.due_date || null,
     }).eq('id', editTask.id)
     if (error) {
-      setEditError('保存に失敗しました: ' + error.message)
+      setEditError('タスクの保存に失敗しました。もう一度お試しください。')
     } else {
       setEditTask(null)
       load()
