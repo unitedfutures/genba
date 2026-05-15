@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'GENBA - 現場タスク管理',
-  description: '建設・工事現場向けタスク・進捗管理アプリ',
+  description: '施設・店舗・工事などあらゆる現場のタスク・打刻・日報・スタッフ管理を一元化',
   manifest: '/manifest.json',
 }
 
