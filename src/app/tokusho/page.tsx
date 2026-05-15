@@ -78,9 +78,10 @@ export default function TokushoPage() {
             </div>
             <span className="font-black text-white tracking-widest text-sm">GENBA</span>
           </Link>
-          <Link href="/" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-            ← トップページへ戻る
-          </Link>
+          <div className="flex items-center gap-5 text-xs text-gray-500">
+            <Link href="/privacy" className="hover:text-gray-300 transition-colors">プライバシーポリシー</Link>
+            <Link href="/" className="hover:text-gray-300 transition-colors">← トップページへ戻る</Link>
+          </div>
         </div>
       </footer>
     </div>
