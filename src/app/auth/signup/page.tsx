@@ -83,7 +83,7 @@ export default function SignupPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={200} height={72} className="mx-auto object-contain" />
+          <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={200} height={72} className="mx-auto object-contain" />
           <p className="text-gray-400 mt-2 text-sm">現場タスク・進捗管理</p>
         </div>
 

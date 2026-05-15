@@ -360,7 +360,7 @@ export default async function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center">
-            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={120} height={43} className="object-contain" />
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={120} height={43} className="object-contain" />
           </div>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (

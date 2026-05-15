@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="-10 -5 991 269"
+     width="971" height="249">
+  <rect x="-10" y="-5" width="991" height="269" fill="white"/>
+  <path d="M 191.1,202.8 A 95,95 0 1 1 212.3,82.5" fill="none" stroke="#333333" stroke-width="29" stroke-linecap="round"/>
+  <polyline points="83,140 113,168 179,102" fill="none" stroke="#f97316" stroke-width="22"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="271" y="192"
+    font-family="Arial Black, Arial, sans-serif"
+    font-weight="900" font-size="170" fill="#333333" letter-spacing="3">GENBA</text>
+</svg>

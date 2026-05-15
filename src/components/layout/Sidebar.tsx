@@ -37,7 +37,7 @@ export default function Sidebar({ profile }: SidebarProps) {
     <aside className="hidden md:flex md:flex-col w-64 bg-gray-900 text-white min-h-screen">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
-        <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={140} height={50} className="object-contain" />
+        <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={140} height={50} className="object-contain" />
       </div>
 
       {/* Org name */}
