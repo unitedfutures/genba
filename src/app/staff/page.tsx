@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserPlus, Mail, Shield, HardHat, Trash2, X, Lock } from 'lucide-react'
+import { UserPlus, Mail, Shield, HardHat, Trash2, X, Lock, Users } from 'lucide-react'
 import Link from 'next/link'
 import UpgradeButton from '@/components/ui/UpgradeButton'
 import type { Profile, Invitation } from '@/types'
@@ -138,7 +138,14 @@ export default function StaffPage() {
         {loading ? (
           <p className="text-gray-400 text-sm py-4 text-center">読み込み中...</p>
         ) : profiles.length === 0 ? (
-          <p className="text-gray-400 text-sm py-4 text-center">スタッフがいません</p>
+          <div className="text-center py-10">
+            <Users size={36} className="text-gray-300 mx-auto mb-3" />
+            <p className="font-bold text-gray-700 mb-1">スタッフがまだいません</p>
+            <p className="text-sm text-gray-400 mb-4">招待リンクを発行して作業者を追加しましょう</p>
+            <button onClick={() => setShowModal(true)} className="btn-primary py-2 px-6 inline-flex items-center gap-2">
+              <UserPlus size={16} /> スタッフを招待する
+            </button>
+          </div>
         ) : (
           <div className="divide-y divide-gray-100">
             {profiles.map(p => (

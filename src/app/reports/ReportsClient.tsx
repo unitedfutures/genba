@@ -221,7 +221,8 @@ export default function ReportsClient({ logs, workers, isAdmin, orgId, currentUs
       {!filtered.length ? (
         <div className="card text-center py-12">
           <FileText size={40} className="text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">日報がありません</p>
+          <p className="font-bold text-gray-700 mb-1">日報がありません</p>
+          <p className="text-sm text-gray-400">スタッフが打刻・作業終了すると日報が作成されます</p>
         </div>
       ) : (
         Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a)).map(([date, dayLogs]) => (

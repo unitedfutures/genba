@@ -31,6 +31,7 @@ export default function TasksPage() {
   const [userId, setUserId] = useState('')
   const [filter, setFilter] = useState<TaskStatus | 'all'>('all')
   const [myOnly, setMyOnly] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
   const initialized = useRef(false)
 
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
@@ -57,6 +58,7 @@ export default function TasksPage() {
     setOrgId(profile.organization_id)
     if (!initialized.current) {
       setMyOnly(profile.role !== 'admin')
+      setIsAdmin(profile.role === 'admin')
       initialized.current = true
     }
 
@@ -327,7 +329,20 @@ export default function TasksPage() {
       ) : sorted.length === 0 ? (
         <div className="card text-center py-12">
           <ClipboardList size={40} className="text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">タスクがありません</p>
+          {isAdmin ? (
+            <>
+              <p className="font-bold text-gray-700 mb-1">タスクがまだありません</p>
+              <p className="text-sm text-gray-400 mb-4">現場ごとに作業タスクを登録して、スタッフに割り当てましょう</p>
+              <button onClick={() => { setShowModal(true); setFormError('') }} className="btn-primary py-2 px-6 inline-flex items-center gap-2">
+                <Plus size={16} /> タスクを追加する
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="font-bold text-gray-700 mb-1">担当タスクはありません</p>
+              <p className="text-sm text-gray-400">管理者からタスクが割り当てられると、ここに表示されます</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

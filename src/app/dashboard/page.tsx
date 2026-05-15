@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from '@/lib/supabase/actions'
 import { redirect } from 'next/navigation'
-import { Users, MapPin, ClipboardList, FileText, Clock, LogIn, LogOut } from 'lucide-react'
+import { Users, MapPin, ClipboardList, FileText, Clock, LogIn, LogOut, ChevronRight, CheckCircle2 } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 
@@ -59,6 +59,33 @@ export default async function DashboardPage({
         <h1 className="text-2xl font-black text-gray-900">ダッシュボード</h1>
         <p className="text-gray-500 text-sm mt-1">{new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</p>
       </div>
+
+      {/* 新規アカウント向けセットアップガイド */}
+      {(staffCount ?? 0) <= 1 && (siteCount ?? 0) === 0 && (
+        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5">
+          <p className="font-bold text-orange-800 mb-4 flex items-center gap-2">
+            🎉 GENBAへようこそ！まず3ステップで初期設定を行いましょう
+          </p>
+          <div className="space-y-3">
+            {[
+              { step: 1, label: '現場を登録する', desc: 'タスク・日報の管理単位になります', href: '/sites', done: (siteCount ?? 0) > 0 },
+              { step: 2, label: 'スタッフを招待する', desc: 'メールアドレスで作業者を招待できます', href: '/staff', done: (staffCount ?? 0) > 1 },
+              { step: 3, label: 'タスクを作成する', desc: '現場ごとに作業タスクを登録します', href: '/tasks', done: (taskCount ?? 0) > 0 },
+            ].map(({ step, label, desc, href, done }) => (
+              <Link key={step} href={href} className={`flex items-center gap-4 p-3 rounded-xl transition-colors ${done ? 'bg-green-50 border border-green-100' : 'bg-white border border-orange-100 hover:border-orange-300'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${done ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>
+                  {done ? <CheckCircle2 size={18} /> : step}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-bold text-sm ${done ? 'text-green-700 line-through' : 'text-gray-800'}`}>{label}</p>
+                  <p className="text-xs text-gray-500">{desc}</p>
+                </div>
+                {!done && <ChevronRight size={16} className="text-orange-400 flex-shrink-0" />}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {upgraded === '1' && (
         <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">

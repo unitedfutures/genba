@@ -106,7 +106,13 @@ export default async function MyPage() {
           <Link href="/my/reports" className="text-sm text-orange-500 font-medium">すべて</Link>
         </div>
         {!recentLogs?.length ? (
-          <p className="text-gray-400 text-sm text-center py-4">日報がありません</p>
+          <div className="text-center py-6">
+            <p className="text-gray-500 font-medium mb-1">日報がまだありません</p>
+            <p className="text-xs text-gray-400 mb-3">打刻で作業を開始・終了すると日報が作成されます</p>
+            <Link href="/my/clock" className="inline-flex items-center gap-1.5 text-sm font-bold text-orange-500 hover:text-orange-600">
+              <Clock size={14} /> 打刻ページへ
+            </Link>
+          </div>
         ) : (
           <div className="space-y-1">
             {recentLogs.map(log => (
