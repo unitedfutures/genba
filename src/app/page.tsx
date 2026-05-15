@@ -776,12 +776,9 @@ export default async function LandingPage() {
       {/* ── Footer ── */}
       <footer className="bg-gray-950 py-8 px-5">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center">
-              <HardHat size={12} className="text-white" />
-            </div>
-            <span className="font-black text-white tracking-widest text-sm">GENBA</span>
-            <span className="text-gray-600 text-xs ml-2">現場タスク・進捗管理</span>
+          <div className="flex items-center gap-3">
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={100} height={36} className="object-contain" />
+            <span className="text-gray-600 text-xs">現場タスク・進捗管理</span>
           </div>
           <div className="flex items-center gap-5 text-xs text-gray-600">
             <Link href="/auth/login" className="hover:text-gray-400 transition-colors">ログイン</Link>
