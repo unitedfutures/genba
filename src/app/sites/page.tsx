@@ -216,7 +216,7 @@ export default function SitesPage() {
             <p className="font-bold text-orange-800 text-sm">現場数の上限に達しています</p>
             <p className="text-orange-700 text-xs mt-0.5">無料プランでは現場を{FREE_SITE_LIMIT}件まで登録できます。3件目以降はTEAMプランへのアップグレードが必要です。</p>
           </div>
-          <Link href="/#pricing" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
+          <Link href="/profile" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
             プランを見る
           </Link>
         </div>

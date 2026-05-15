@@ -155,7 +155,7 @@ export default function StaffPage() {
             <p className="font-bold text-orange-800 text-sm">スタッフ招待はTEAMプランで利用できます</p>
             <p className="text-orange-700 text-xs mt-0.5">¥980/名/月〜。チームで使い始めると打刻・日報・タスク管理がより効果的になります。</p>
           </div>
-          <Link href="/#pricing" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
+          <Link href="/profile" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
             プランを見る
           </Link>
         </div>
