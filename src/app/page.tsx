@@ -49,7 +49,7 @@ function DashboardMockup() {
         {/* Sidebar */}
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
           <div className="px-3 mb-2">
-            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード', active: true },
@@ -126,7 +126,7 @@ function TaskMockup() {
       <div className="flex h-[320px] text-[11px]">
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
           <div className="px-3 mb-2">
-            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード' },
@@ -175,11 +175,11 @@ function TaskMockup() {
 function ClockMockup() {
   return (
     <PhoneFrame>
+      <div className="bg-gray-900 px-3 py-2 flex items-center justify-between">
+        <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={64} height={23} className="object-contain" />
+        <div className="w-5 h-5 bg-gray-600 rounded-full" />
+      </div>
       <div className="bg-gray-50 p-3">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] text-gray-500">マイページ</span>
-          <div className="w-6 h-6 bg-gray-200 rounded-full" />
-        </div>
         <div className="bg-white rounded-2xl p-3 mb-2 shadow-sm text-center">
           <div className="text-[9px] text-gray-400 mb-1">現在地</div>
           <div className="text-[10px] font-medium text-gray-700 mb-2">東京都港区○○町1-2-3</div>
@@ -223,7 +223,7 @@ function ReportsMockup() {
       <div className="flex h-[300px] text-[11px]">
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
           <div className="px-3 mb-2">
-            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード' },
@@ -296,7 +296,7 @@ function StaffMockup() {
       <div className="flex h-[280px] text-[11px]">
         <div className="w-[120px] bg-gray-900 flex flex-col py-3 gap-0.5 flex-shrink-0">
           <div className="px-3 mb-2">
-            <Image src="/logo/GENBA_logo_horizontal_transparent.svg" alt="GENBA" width={90} height={32} className="object-contain" />
+            <Image src="/logo/GENBA_logo_horizontal_large_dark.png" alt="GENBA" width={90} height={32} className="object-contain" />
           </div>
           {[
             { icon: BarChart3, label: 'ダッシュボード' },
