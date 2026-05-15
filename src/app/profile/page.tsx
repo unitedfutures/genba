@@ -8,7 +8,7 @@ import UpgradeButton from '@/components/ui/UpgradeButton'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
-  const [form, setForm] = useState({ full_name: '', phone: '' })
+  const [form, setForm] = useState({ full_name: '', phone: '', company_name: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -33,7 +33,7 @@ export default function ProfilePage() {
         .single()
       if (data) {
         setProfile(data)
-        setForm({ full_name: data.full_name ?? '', phone: data.phone ?? '' })
+        setForm({ full_name: data.full_name ?? '', phone: data.phone ?? '', company_name: data.organization?.name ?? '' })
         setPlan(data.organization?.plan ?? 'free')
       }
     }
@@ -50,6 +50,9 @@ export default function ProfilePage() {
       full_name: form.full_name,
       phone: form.phone || null,
     }).eq('id', user.id)
+    if (profile?.role === 'admin' && form.company_name) {
+      await supabase.from('organizations').update({ name: form.company_name }).eq('id', profile.organization_id)
+    }
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -150,6 +153,19 @@ export default function ProfilePage() {
       <div className="card">
         <h2 className="font-bold text-gray-700 mb-4">プロフィール編集</h2>
         <form onSubmit={handleSave} className="space-y-4">
+          {profile?.role === 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">会社名</label>
+              <input
+                type="text"
+                value={form.company_name}
+                onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))}
+                className="input-field"
+                placeholder="株式会社〇〇"
+                required
+              />
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">氏名</label>
             <input
