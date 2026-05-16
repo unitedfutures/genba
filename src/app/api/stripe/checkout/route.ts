@@ -22,28 +22,36 @@ export async function POST() {
 
   const quantity = Math.max(staffCount ?? 1, 1)
 
-  // Stripe カスタマーを取得 or 作成
-  let customerId = org.stripe_customer_id as string | null
-  if (!customerId) {
-    const customer = await getStripe().customers.create({
-      email: user.email,
-      name: org.name,
+  try {
+    // Stripe カスタマーを取得 or 作成
+    let customerId = org.stripe_customer_id as string | null
+    if (!customerId) {
+      const customer = await getStripe().customers.create({
+        email: user.email,
+        name: org.name,
+        metadata: { organization_id: org.id },
+      })
+      customerId = customer.id
+      await supabase.from('organizations').update({ stripe_customer_id: customerId }).eq('id', org.id)
+    }
+
+    const session = await getStripe().checkout.sessions.create({
+      customer: customerId,
+      mode: 'subscription',
+      line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity }],
+      success_url: `${APP_URL}/dashboard?upgraded=1`,
+      cancel_url: `${APP_URL}/dashboard`,
       metadata: { organization_id: org.id },
+      subscription_data: { metadata: { organization_id: org.id } },
+      locale: 'ja',
     })
-    customerId = customer.id
-    await supabase.from('organizations').update({ stripe_customer_id: customerId }).eq('id', org.id)
+
+    return NextResponse.json({ url: session.url })
+  } catch (e: any) {
+    console.error('Stripe checkout error:', e)
+    return NextResponse.json(
+      { error: e?.message ?? '決済セッションの作成に失敗しました' },
+      { status: 500 }
+    )
   }
-
-  const session = await getStripe().checkout.sessions.create({
-    customer: customerId,
-    mode: 'subscription',
-    line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity }],
-    success_url: `${APP_URL}/dashboard?upgraded=1`,
-    cancel_url: `${APP_URL}/dashboard`,
-    metadata: { organization_id: org.id },
-    subscription_data: { metadata: { organization_id: org.id } },
-    locale: 'ja',
-  })
-
-  return NextResponse.json({ url: session.url })
 }

@@ -200,7 +200,10 @@ export default function ProfilePage() {
                 )}
               </div>
             ) : (
-              <UpgradeButton className="w-full" label="TEAMプランにアップグレード" />
+              <UpgradeButton
+                className="w-full py-3 rounded-xl font-bold bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                label="TEAMプランにアップグレード"
+              />
             )
           )}
         </div>
