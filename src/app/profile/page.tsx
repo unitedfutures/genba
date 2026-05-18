@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff, CreditCard, Loader2, Crown, X, AlertTriangle } from 'lucide-react'
+import { UserCircle, Save, LogOut, KeyRound, Eye, EyeOff, CreditCard, Loader2, Crown, X, AlertTriangle, Camera } from 'lucide-react'
 import { signOut } from '@/lib/supabase/actions'
 import UpgradeButton from '@/components/ui/UpgradeButton'
 
@@ -11,6 +11,10 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ full_name: '', phone: '', company_name: '' })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [plan, setPlan] = useState<'free' | 'paid' | null>(null)
   const [staffCount, setStaffCount] = useState(0)
@@ -39,6 +43,7 @@ export default function ProfilePage() {
         .single()
       if (data) {
         setProfile(data)
+        setAvatarUrl(data.avatar_url ?? null)
         setForm({ full_name: data.full_name ?? '', phone: data.phone ?? '', company_name: data.organization?.name ?? '' })
         setPlan(data.organization?.plan ?? 'free')
         // 自分以外のスタッフ数を取得
@@ -95,6 +100,39 @@ export default function ProfilePage() {
     setPwSaving(false)
   }
 
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAvatarError('')
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('画像ファイルを選択してください')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError('5MB以下の画像を選択してください')
+      return
+    }
+    setUploadingAvatar(true)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/avatar.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true })
+    if (uploadError) {
+      setAvatarError('アップロードに失敗しました。もう一度お試しください。')
+      setUploadingAvatar(false)
+      return
+    }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    const urlWithBust = `${publicUrl}?t=${Date.now()}`
+    await supabase.from('profiles').update({ avatar_url: urlWithBust }).eq('id', user.id)
+    setAvatarUrl(urlWithBust)
+    setUploadingAvatar(false)
+  }
+
   async function handlePortal() {
     setPortalLoading(true)
     setPortalError('')
@@ -130,13 +168,35 @@ export default function ProfilePage() {
 
       {/* Avatar */}
       <div className="card text-center py-8">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="" className="w-20 h-20 rounded-full object-cover" />
-          ) : (
-            <UserCircle size={48} className="text-gray-400" />
-          )}
+        <div className="relative w-20 h-20 mx-auto mb-3">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden group relative"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-20 h-20 rounded-full object-cover" />
+            ) : (
+              <UserCircle size={48} className="text-gray-400" />
+            )}
+            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              {uploadingAvatar ? (
+                <Loader2 size={20} className="text-white animate-spin" />
+              ) : (
+                <Camera size={20} className="text-white" />
+              )}
+            </div>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarUpload}
+          />
         </div>
+        {avatarError && <p className="text-red-600 text-xs mb-2">{avatarError}</p>}
         <p className="font-bold text-gray-900 text-lg">{profile?.full_name}</p>
         <p className="text-sm text-gray-500">{roleLabel}</p>
         <p className="text-xs text-gray-400 mt-1">{profile?.organization?.name}</p>

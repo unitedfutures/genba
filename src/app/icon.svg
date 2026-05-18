@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="200" fill="#111827"/>
+  <!-- Arc (C shape) - white, centered in the icon -->
+  <path d="M 293.2,291.1 A 145,145 0 1 1 325.6,107.5"
+    fill="none" stroke="white" stroke-width="42" stroke-linecap="round"
+    transform="translate(0, -20)"/>
+  <!-- Checkmark - orange -->
+  <polyline points="128,195 174,238 274,138"
+    fill="none" stroke="#f97316" stroke-width="32"
+    stroke-linecap="round" stroke-linejoin="round"
+    transform="translate(0, -20)"/>
+</svg>

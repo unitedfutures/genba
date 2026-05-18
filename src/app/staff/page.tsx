@@ -21,6 +21,7 @@ export default function StaffPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
   const [plan, setPlan] = useState<string>('free')
 
   const load = useCallback(async () => {
@@ -56,28 +57,19 @@ export default function StaffPage() {
     setSubmitting(true)
     setError('')
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const token = crypto.randomUUID()
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-
-    const { error: insertError } = await supabase.from('invitations').insert({
-      organization_id: myOrgId,
-      email: form.email,
-      role: form.role,
-      token,
-      invited_by: user.id,
-      expires_at: expires,
+    const res = await fetch('/api/invitations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.email, role: form.role }),
     })
+    const data = await res.json()
 
-    if (insertError) {
-      setError('招待の作成に失敗しました。もう一度お試しください。')
+    if (!res.ok) {
+      setError(data.error ?? '招待の作成に失敗しました。もう一度お試しください。')
     } else {
-      const url = `${window.location.origin}/auth/invite/${token}`
-      await navigator.clipboard.writeText(url).catch(() => {})
-      setInviteUrl(url)
+      await navigator.clipboard.writeText(data.inviteUrl).catch(() => {})
+      setInviteUrl(data.inviteUrl)
+      setEmailSent(data.emailSent ?? false)
       setShowModal(false)
       setForm({ email: '', role: 'worker' })
       load()
@@ -142,7 +134,10 @@ export default function StaffPage() {
 
       {inviteUrl && (
         <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
-          <p className="font-bold text-green-800 text-sm mb-1">招待リンクを作成しました（クリップボードにコピー済み）</p>
+          <p className="font-bold text-green-800 text-sm mb-1">
+            {emailSent ? '招待メールを送信しました' : '招待リンクを作成しました（クリップボードにコピー済み）'}
+          </p>
+          {emailSent && <p className="text-green-700 text-xs mb-2">招待URLはクリップボードにもコピーされています。</p>}
           <p className="text-xs text-green-700 break-all font-mono">{inviteUrl}</p>
           <button onClick={() => setInviteUrl('')} className="mt-2 text-xs text-green-600 underline">閉じる</button>
         </div>
