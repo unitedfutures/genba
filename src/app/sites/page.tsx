@@ -209,19 +209,6 @@ export default function SitesPage() {
         <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{deleteError}</p>
       )}
 
-      {atSiteLimit && (
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
-          <Lock size={18} className="text-orange-500 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="font-bold text-orange-800 text-sm">現場数の上限に達しています</p>
-            <p className="text-orange-700 text-xs mt-0.5">無料プランでは現場を{FREE_SITE_LIMIT}件まで登録できます。3件目以降はTEAMプランへのアップグレードが必要です。</p>
-          </div>
-          <Link href="/profile" className="flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors">
-            プランを見る
-          </Link>
-        </div>
-      )}
-
       {/* 並び替えバー */}
       {sites.length > 1 && (
         <div className="flex items-center gap-2 text-sm">
