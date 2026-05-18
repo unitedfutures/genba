@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from '@/lib/supabase/actions'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getStripe } from '@/lib/stripe'
 import { redirect } from 'next/navigation'
 import { Users, MapPin, ClipboardList, FileText, Clock, LogIn, LogOut, ChevronRight, CheckCircle2 } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -13,6 +15,35 @@ export default async function DashboardPage({
   const { upgraded } = await searchParams
   const profile = await getCurrentProfile()
   if (!profile) redirect('/auth/login')
+
+  // 決済完了後のプラン同期（?upgraded=1 のとき Stripe から直接取得して DB 更新）
+  if (upgraded === '1' && profile.organization_id) {
+    try {
+      const admin = createAdminClient()
+      const { data: org } = await admin
+        .from('organizations')
+        .select('id, plan, stripe_customer_id')
+        .eq('id', profile.organization_id)
+        .single()
+
+      if (org?.stripe_customer_id && org.plan !== 'paid') {
+        const subscriptions = await getStripe().subscriptions.list({
+          customer: org.stripe_customer_id,
+          status: 'active',
+          limit: 1,
+        })
+        if (subscriptions.data.length > 0) {
+          const sub = subscriptions.data[0]
+          await admin.from('organizations').update({
+            plan: 'paid',
+            stripe_subscription_id: sub.id,
+          }).eq('id', org.id)
+        }
+      }
+    } catch (e) {
+      console.error('Plan sync error on dashboard:', e)
+    }
+  }
 
   // Workers are redirected to their own dashboard
   if (profile.role === 'worker') redirect('/my')
