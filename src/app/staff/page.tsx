@@ -21,6 +21,7 @@ export default function StaffPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
+  const [deleteSuccess, setDeleteSuccess] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [plan, setPlan] = useState<string>('free')
 
@@ -88,8 +89,11 @@ export default function StaffPage() {
     if (!confirm(`「${name}」を削除しますか？\nこの操作は元に戻せません。`)) return
     setDeletingId(profileId)
     setDeleteError('')
+    setDeleteSuccess('')
     const res = await fetch(`/api/staff/${profileId}`, { method: 'DELETE' })
     if (res.ok) {
+      setDeleteSuccess(`「${name}」を削除しました`)
+      setTimeout(() => setDeleteSuccess(''), 4000)
       load()
     } else {
       const { error } = await res.json()
@@ -128,6 +132,9 @@ export default function StaffPage() {
         )}
       </div>
 
+      {deleteSuccess && (
+        <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-xl px-4 py-3">{deleteSuccess}</p>
+      )}
       {deleteError && (
         <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{deleteError}</p>
       )}
