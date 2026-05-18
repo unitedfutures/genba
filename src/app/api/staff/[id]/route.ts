@@ -29,7 +29,8 @@ export async function DELETE(
   // Supabase Auth からユーザー削除（profiles は cascade で削除される）
   const { error: deleteError } = await admin.auth.admin.deleteUser(id)
   if (deleteError) {
-    return NextResponse.json({ error: 'ユーザーの削除に失敗しました' }, { status: 500 })
+    console.error('deleteUser error:', deleteError)
+    return NextResponse.json({ error: `ユーザーの削除に失敗しました: ${deleteError.message}` }, { status: 500 })
   }
 
   // 削除後の人数を取得
