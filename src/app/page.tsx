@@ -382,6 +382,7 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
+              <p className="text-orange-300 text-sm font-medium mb-3">複数の現場を管理する方に</p>
               <div className="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
                 <HardHat size={12} />
                 あらゆる現場の、タスクと進捗を一元管理
@@ -728,7 +729,8 @@ export default async function LandingPage() {
               <div className="text-3xl font-black text-gray-900 mb-0.5">
                 ¥980<span className="text-base font-normal text-gray-400"> / 名 / 月</span>
               </div>
-              <p className="text-gray-400 text-xs mb-5">管理者含む人数分 · 最低2名〜</p>
+              <p className="text-gray-400 text-xs mb-2">管理者含む人数分 · 最低2名〜</p>
+              <span className="inline-block bg-green-100 text-green-700 text-[11px] font-bold px-2 py-0.5 rounded-full mb-4">初期費用無料</span>
               <ul className="space-y-2 mb-6">
                 {[
                   'FREEプランのすべての機能',
