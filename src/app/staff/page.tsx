@@ -107,9 +107,17 @@ export default function StaffPage() {
     const label = newRole === 'admin' ? '管理者' : '作業者'
     if (!confirm(`権限を「${label}」に変更しますか？`)) return
     setTogglingId(profileId)
-    const supabase = createClient()
-    await supabase.from('profiles').update({ role: newRole }).eq('id', profileId)
-    setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, role: newRole as 'admin' | 'worker' } : p))
+    const res = await fetch(`/api/staff/${profileId}/role`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole }),
+    })
+    if (res.ok) {
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, role: newRole as 'admin' | 'worker' } : p))
+    } else {
+      const { error } = await res.json()
+      alert(error ?? '権限の変更に失敗しました')
+    }
     setTogglingId(null)
   }
 
