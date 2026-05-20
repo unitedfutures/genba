@@ -19,8 +19,14 @@ export default function ClockPage() {
   const [profile, setProfile] = useState<any>(null)
   const [locationStatus, setLocationStatus] = useState<'idle' | 'getting' | 'got' | 'error'>('idle')
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null)
+  const [now, setNow] = useState(() => new Date())
 
-  const today = new Date().toISOString().split('T')[0]
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const today = now.toISOString().split('T')[0]
 
   const load = useCallback(async () => {
     const supabase = createClient()
@@ -132,7 +138,8 @@ export default function ClockPage() {
   const formatTime = (ts: string | null) =>
     ts ? new Date(ts).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : null
 
-  const now = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+  const nowTime = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+  const nowDate = now.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' })
 
   if (loading) {
     return <div className="flex items-center justify-center h-64 text-gray-400">読み込み中...</div>
@@ -146,9 +153,9 @@ export default function ClockPage() {
       <div className="card text-center py-6">
         <div className="flex items-center justify-center gap-2 text-gray-500 mb-1">
           <Clock size={16} />
-          <span className="text-sm">{new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' })}</span>
+          <span className="text-sm">{nowDate}</span>
         </div>
-        <p className="text-5xl font-black text-gray-900">{now}</p>
+        <p className="text-5xl font-black text-gray-900">{nowTime}</p>
       </div>
 
       {/* Status */}
