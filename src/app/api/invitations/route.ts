@@ -46,7 +46,6 @@ export async function POST(request: Request) {
   const roleLabel = role === 'admin' ? '管理者' : '作業者'
 
   // メール送信
-  console.log('BREVO_API_KEY defined:', !!process.env.BREVO_API_KEY)
   try {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
@@ -114,10 +113,8 @@ export async function POST(request: Request) {
       `,
       }),
     })
-    const resText = await res.text()
-    console.log('Brevo response:', res.status, resText)
     if (!res.ok) {
-      console.error('Brevo error:', res.status, resText)
+      console.error('Brevo error:', res.status, await res.text())
       return NextResponse.json({ token, inviteUrl, emailSent: false })
     }
   } catch (e) {
