@@ -114,9 +114,10 @@ export async function POST(request: Request) {
       `,
       }),
     })
+    const resText = await res.text()
+    console.log('Brevo response:', res.status, resText)
     if (!res.ok) {
-      const errText = await res.text()
-      console.error('Brevo error:', res.status, errText)
+      console.error('Brevo error:', res.status, resText)
       return NextResponse.json({ token, inviteUrl, emailSent: false })
     }
   } catch (e) {
