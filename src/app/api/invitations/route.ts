@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { getCurrentProfile } from '@/lib/supabase/actions'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -48,12 +47,17 @@ export async function POST(request: Request) {
 
   // メール送信
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: 'GENBA <noreply@genba.works>',
-      to: email,
-      subject: `【GENBA】${org.name}から招待が届いています`,
-      html: `
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY!,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'GENBA', email: 'noreply@genba.works' },
+        to: [{ email }],
+        subject: `【GENBA】${org.name}から招待が届いています`,
+        htmlContent: `
 <!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -107,9 +111,15 @@ export async function POST(request: Request) {
 </body>
 </html>
       `,
+      }),
     })
+    if (!res.ok) {
+      const errText = await res.text()
+      console.error('Brevo error:', res.status, errText)
+      return NextResponse.json({ token, inviteUrl, emailSent: false })
+    }
   } catch (e) {
-    console.error('Resend error:', e)
+    console.error('Brevo error:', e)
     // メール送信失敗しても招待URL自体は返す
     return NextResponse.json({ token, inviteUrl, emailSent: false })
   }
