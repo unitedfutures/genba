@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Clock, MapPin, MessageSquare, Send, ArrowLeft } from 'lucide-react'
+import { Clock, MapPin, MessageSquare, Send, ArrowLeft, RotateCcw } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import type { Profile } from '@/types'
@@ -18,6 +18,20 @@ export default function ReportDetail({ log, currentProfile }: Props) {
   const [newComment, setNewComment] = useState('')
   const [posting, setPosting] = useState(false)
   const [comments, setComments] = useState<any[]>(log.comments ?? [])
+  const [status, setStatus] = useState<string>(log.status)
+  const [reverting, setReverting] = useState(false)
+
+  async function handleRevertToDraft() {
+    if (!confirm('この日報を差し戻しますか？作業者が再編集できるようになります。')) return
+    setReverting(true)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('work_logs')
+      .update({ status: 'draft' })
+      .eq('id', log.id)
+    if (!error) setStatus('draft')
+    setReverting(false)
+  }
 
   const beforePhotos = (log.photos ?? []).filter((p: any) => p.photo_type === 'before')
   const afterPhotos = (log.photos ?? []).filter((p: any) => p.photo_type === 'after')
@@ -64,8 +78,19 @@ export default function ReportDetail({ log, currentProfile }: Props) {
           </h1>
           <p className="text-sm text-gray-500">{log.worker?.full_name} · {log.site?.name}</p>
         </div>
-        <div className="ml-auto">
-          <StatusBadge type="worklog" status={log.status} />
+        <div className="ml-auto flex items-center gap-2">
+          <StatusBadge type="worklog" status={status} />
+          {currentProfile.role === 'admin' && status === 'submitted' && (
+            <button
+              onClick={handleRevertToDraft}
+              disabled={reverting}
+              title="差し戻す"
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-orange-600 border border-gray-300 hover:border-orange-400 rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50"
+            >
+              <RotateCcw size={13} />
+              差し戻す
+            </button>
+          )}
         </div>
       </div>
 

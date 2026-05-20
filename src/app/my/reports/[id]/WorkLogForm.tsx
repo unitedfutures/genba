@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin } from 'lucide-react'
+import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin, Lock } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import UpgradeButton from '@/components/ui/UpgradeButton'
@@ -122,6 +122,7 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
   const formatTime = (ts: string | null) =>
     ts ? new Date(ts).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '--:--'
 
+  const isLocked = log.status === 'submitted'
   const beforePhotos = photos.filter(p => p.photo_type === 'before')
   const afterPhotos = photos.filter(p => p.photo_type === 'after')
 
@@ -140,6 +141,14 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
         </div>
         <StatusBadge type="worklog" status={log.status} />
       </div>
+
+      {/* Locked banner */}
+      {isLocked && (
+        <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-blue-700 text-sm">
+          <Lock size={14} className="flex-shrink-0" />
+          <span>この日報は提出済みです。内容を変更するには管理者に差し戻しを依頼してください。</span>
+        </div>
+      )}
 
       {/* Clock info */}
       <div className="card">
@@ -168,31 +177,47 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
       {/* Work description */}
       <div className="card space-y-3">
         <h2 className="font-bold text-gray-900">作業内容</h2>
-        <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          className="input-field resize-none"
-          rows={4}
-          placeholder="本日の作業内容を入力してください..."
-        />
+        {isLocked ? (
+          <p className="text-gray-800 whitespace-pre-wrap min-h-[4rem] bg-gray-50 rounded-xl px-3 py-2 text-sm">
+            {description || <span className="text-gray-400">（未入力）</span>}
+          </p>
+        ) : (
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            className="input-field resize-none"
+            rows={4}
+            placeholder="本日の作業内容を入力してください..."
+          />
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">コメント・メモ</label>
-          <textarea
-            value={workerComment}
-            onChange={e => setWorkerComment(e.target.value)}
-            className="input-field resize-none"
-            rows={2}
-            placeholder="気になった点、管理者へのメモなど..."
-          />
+          {isLocked ? (
+            <p className="text-gray-800 whitespace-pre-wrap min-h-[2.5rem] bg-gray-50 rounded-xl px-3 py-2 text-sm">
+              {workerComment || <span className="text-gray-400">（未入力）</span>}
+            </p>
+          ) : (
+            <textarea
+              value={workerComment}
+              onChange={e => setWorkerComment(e.target.value)}
+              className="input-field resize-none"
+              rows={2}
+              placeholder="気になった点、管理者へのメモなど..."
+            />
+          )}
         </div>
-        <button
-          onClick={() => handleSave()}
-          disabled={saving}
-          className="btn-secondary w-full py-2.5 text-sm"
-        >
-          {saving ? '保存中...' : '下書き保存'}
-        </button>
-        {saveError && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{saveError}</p>}
+        {!isLocked && (
+          <>
+            <button
+              onClick={() => handleSave()}
+              disabled={saving}
+              className="btn-secondary w-full py-2.5 text-sm"
+            >
+              {saving ? '保存中...' : '下書き保存'}
+            </button>
+            {saveError && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{saveError}</p>}
+          </>
+        )}
       </div>
 
       {/* Before photos */}
@@ -204,38 +229,42 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
             {beforePhotos.map(photo => (
               <div key={photo.id} className="relative aspect-square">
                 <img src={photo.url} alt="作業前" className="w-full h-full object-cover rounded-xl" />
-                <button
-                  onClick={() => handleDeletePhoto(photo.id, photo.storage_path)}
-                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                >×</button>
+                {!isLocked && (
+                  <button
+                    onClick={() => handleDeletePhoto(photo.id, photo.storage_path)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+                  >×</button>
+                )}
               </div>
             ))}
           </div>
         )}
-        {plan === 'free' ? (
-          <UpgradeButton
-            label="写真添付はTEAMプランで利用できます"
-            className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 text-sm disabled:opacity-60"
-          />
-        ) : (
-          <>
-            <input
-              ref={beforeInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={e => handlePhotoUpload(e, 'before')}
+        {!isLocked && (
+          plan === 'free' ? (
+            <UpgradeButton
+              label="写真添付はTEAMプランで利用できます"
+              className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 text-sm disabled:opacity-60"
             />
-            <button
-              onClick={() => beforeInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-            >
-              <Camera size={20} />
-              {uploading ? 'アップロード中...' : '写真を追加'}
-            </button>
-          </>
+          ) : (
+            <>
+              <input
+                ref={beforeInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={e => handlePhotoUpload(e, 'before')}
+              />
+              <button
+                onClick={() => beforeInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
+              >
+                <Camera size={20} />
+                {uploading ? 'アップロード中...' : '写真を追加'}
+              </button>
+            </>
+          )
         )}
       </div>
 
@@ -247,38 +276,42 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
             {afterPhotos.map(photo => (
               <div key={photo.id} className="relative aspect-square">
                 <img src={photo.url} alt="作業後" className="w-full h-full object-cover rounded-xl" />
-                <button
-                  onClick={() => handleDeletePhoto(photo.id, photo.storage_path)}
-                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                >×</button>
+                {!isLocked && (
+                  <button
+                    onClick={() => handleDeletePhoto(photo.id, photo.storage_path)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+                  >×</button>
+                )}
               </div>
             ))}
           </div>
         )}
-        {plan === 'free' ? (
-          <UpgradeButton
-            label="写真添付はTEAMプランで利用できます"
-            className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 text-sm disabled:opacity-60"
-          />
-        ) : (
-          <>
-            <input
-              ref={afterInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={e => handlePhotoUpload(e, 'after')}
+        {!isLocked && (
+          plan === 'free' ? (
+            <UpgradeButton
+              label="写真添付はTEAMプランで利用できます"
+              className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 text-sm disabled:opacity-60"
             />
-            <button
-              onClick={() => afterInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-            >
-              <Camera size={20} />
-              {uploading ? 'アップロード中...' : '写真を追加'}
-            </button>
-          </>
+          ) : (
+            <>
+              <input
+                ref={afterInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={e => handlePhotoUpload(e, 'after')}
+              />
+              <button
+                onClick={() => afterInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
+              >
+                <Camera size={20} />
+                {uploading ? 'アップロード中...' : '写真を追加'}
+              </button>
+            </>
+          )
         )}
       </div>
 
