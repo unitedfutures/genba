@@ -22,6 +22,85 @@ const emptyForm = {
   status: 'pending' as TaskStatus, priority: 'medium' as TaskPriority, due_date: '',
 }
 
+// ─── コンポーネント外に定義することで、親の再レンダー時に
+//     unmount→remount されてフォーカスが消える問題を防ぐ ───
+
+function PriorityBadge({ priority }: { priority: TaskPriority }) {
+  const { label, className } = priorityConfig[priority]
+  return <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${className}`}>{label}</span>
+}
+
+function TaskForm({ values, onChange, onSubmit, onCancel, submitting: sub, error: err, isEdit, sites, workers }: {
+  values: typeof emptyForm
+  onChange: (v: typeof emptyForm) => void
+  onSubmit: (e: React.FormEvent) => void
+  onCancel: () => void
+  submitting: boolean
+  error: string
+  isEdit: boolean
+  sites: { id: string; name: string }[]
+  workers: { id: string; full_name: string }[]
+}) {
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      {err && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{err}</p>}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">タスク名 <span className="text-red-500">*</span></label>
+        <input type="text" value={values.title} onChange={e => onChange({ ...values, title: e.target.value })} className="input-field" placeholder="内装工事" required />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">詳細</label>
+        <textarea value={values.description} onChange={e => onChange({ ...values, description: e.target.value })} className="input-field resize-none" rows={2} />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">現場 <span className="text-red-500">*</span></label>
+        <select value={values.site_id} onChange={e => onChange({ ...values, site_id: e.target.value })} className="input-field" required>
+          <option value="">選択してください</option>
+          {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">担当者</label>
+        <select value={values.assigned_to} onChange={e => onChange({ ...values, assigned_to: e.target.value })} className="input-field">
+          <option value="">未アサイン</option>
+          {workers.map(w => <option key={w.id} value={w.id}>{w.full_name}</option>)}
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">優先度</label>
+          <select value={values.priority} onChange={e => onChange({ ...values, priority: e.target.value as TaskPriority })} className="input-field">
+            <option value="high">🔴 高</option>
+            <option value="medium">🟡 中</option>
+            <option value="low">⚪ 低</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
+          <select value={values.status} onChange={e => onChange({ ...values, status: e.target.value as TaskStatus })} className="input-field">
+            <option value="pending">未着手</option>
+            <option value="in_progress">作業中</option>
+            <option value="completed">完了</option>
+            <option value="cancelled">キャンセル</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">期日</label>
+        <input type="date" value={values.due_date} onChange={e => onChange({ ...values, due_date: e.target.value })} className="input-field" />
+      </div>
+      {isEdit ? (
+        <div className="flex gap-2">
+          <button type="button" onClick={onCancel} className="btn-secondary flex-1">キャンセル</button>
+          <button type="submit" disabled={sub} className="btn-primary flex-1 disabled:opacity-50">{sub ? '保存中...' : '保存する'}</button>
+        </div>
+      ) : (
+        <button type="submit" disabled={sub} className="btn-primary w-full disabled:opacity-50">{sub ? '追加中...' : '追加する'}</button>
+      )}
+    </form>
+  )
+}
+
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [sites, setSites] = useState<{ id: string; name: string }[]>([])
@@ -191,80 +270,6 @@ export default function TasksPage() {
     { label: '完了', value: 'completed' },
   ]
 
-  const PriorityBadge = ({ priority }: { priority: TaskPriority }) => {
-    const { label, className } = priorityConfig[priority]
-    return (
-      <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${className}`}>{label}</span>
-    )
-  }
-
-  const TaskForm = ({ values, onChange, onSubmit, onCancel, submitting: sub, error: err, isEdit }: {
-    values: typeof emptyForm
-    onChange: (v: typeof emptyForm) => void
-    onSubmit: (e: React.FormEvent) => void
-    onCancel: () => void
-    submitting: boolean
-    error: string
-    isEdit: boolean
-  }) => (
-    <form onSubmit={onSubmit} className="space-y-4">
-      {err && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{err}</p>}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">タスク名 <span className="text-red-500">*</span></label>
-        <input type="text" value={values.title} onChange={e => onChange({ ...values, title: e.target.value })} className="input-field" placeholder="内装工事" required />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">詳細</label>
-        <textarea value={values.description} onChange={e => onChange({ ...values, description: e.target.value })} className="input-field resize-none" rows={2} />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">現場 <span className="text-red-500">*</span></label>
-        <select value={values.site_id} onChange={e => onChange({ ...values, site_id: e.target.value })} className="input-field" required>
-          <option value="">選択してください</option>
-          {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">担当者</label>
-        <select value={values.assigned_to} onChange={e => onChange({ ...values, assigned_to: e.target.value })} className="input-field">
-          <option value="">未アサイン</option>
-          {workers.map(w => <option key={w.id} value={w.id}>{w.full_name}</option>)}
-        </select>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">優先度</label>
-          <select value={values.priority} onChange={e => onChange({ ...values, priority: e.target.value as TaskPriority })} className="input-field">
-            <option value="high">🔴 高</option>
-            <option value="medium">🟡 中</option>
-            <option value="low">⚪ 低</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
-          <select value={values.status} onChange={e => onChange({ ...values, status: e.target.value as TaskStatus })} className="input-field">
-            <option value="pending">未着手</option>
-            <option value="in_progress">作業中</option>
-            <option value="completed">完了</option>
-            <option value="cancelled">キャンセル</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">期日</label>
-        <input type="date" value={values.due_date} onChange={e => onChange({ ...values, due_date: e.target.value })} className="input-field" />
-      </div>
-      {isEdit ? (
-        <div className="flex gap-2">
-          <button type="button" onClick={onCancel} className="btn-secondary flex-1">キャンセル</button>
-          <button type="submit" disabled={sub} className="btn-primary flex-1 disabled:opacity-50">{sub ? '保存中...' : '保存する'}</button>
-        </div>
-      ) : (
-        <button type="submit" disabled={sub} className="btn-primary w-full disabled:opacity-50">{sub ? '追加中...' : '追加する'}</button>
-      )}
-    </form>
-  )
-
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
@@ -398,7 +403,7 @@ export default function TasksPage() {
               <h3 className="font-bold text-lg">タスクを追加</h3>
               <button onClick={() => { setShowModal(false); setFormError('') }} className="p-1 text-gray-400"><X size={20} /></button>
             </div>
-            <TaskForm values={form} onChange={setForm} onSubmit={handleCreate} onCancel={() => { setShowModal(false); setFormError('') }} submitting={submitting} error={formError} isEdit={false} />
+            <TaskForm values={form} onChange={setForm} onSubmit={handleCreate} onCancel={() => { setShowModal(false); setFormError('') }} submitting={submitting} error={formError} isEdit={false} sites={sites} workers={workers} />
           </div>
         </div>
       )}
@@ -411,7 +416,7 @@ export default function TasksPage() {
               <h3 className="font-bold text-lg">タスクを編集</h3>
               <button onClick={() => setEditTask(null)} className="p-1 text-gray-400"><X size={20} /></button>
             </div>
-            <TaskForm values={editForm} onChange={setEditForm} onSubmit={handleEdit} onCancel={() => setEditTask(null)} submitting={editSubmitting} error={editError} isEdit={true} />
+            <TaskForm values={editForm} onChange={setEditForm} onSubmit={handleEdit} onCancel={() => setEditTask(null)} submitting={editSubmitting} error={editError} isEdit={true} sites={sites} workers={workers} />
           </div>
         </div>
       )}
