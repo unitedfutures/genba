@@ -16,6 +16,7 @@ export default function SitesPage() {
   const [orgId, setOrgId] = useState('')
   const [userId, setUserId] = useState('')
   const [plan, setPlan] = useState<string>('free')
+  const [isAdmin, setIsAdmin] = useState(false)
 
   // 新規追加モーダル
   const [showAddModal, setShowAddModal] = useState(false)
@@ -46,12 +47,13 @@ export default function SitesPage() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('organization_id, organization:organizations(plan)')
+      .select('organization_id, role, organization:organizations(plan)')
       .eq('id', user.id)
       .single()
     if (!profile) return
     setOrgId(profile.organization_id)
     setPlan((profile.organization as any)?.plan ?? 'free')
+    setIsAdmin(profile.role === 'admin')
 
     const { data } = await supabase
       .from('sites')
@@ -167,23 +169,25 @@ export default function SitesPage() {
         <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
       </Link>
 
-      {/* 編集・削除ボタン */}
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          onClick={() => openEdit(site)}
-          className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-          title="編集"
-        >
-          <Pencil size={16} />
-        </button>
-        <button
-          onClick={() => handleDelete(site)}
-          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-          title="削除"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
+      {/* 編集・削除ボタン（管理者のみ） */}
+      {isAdmin && (
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            onClick={() => openEdit(site)}
+            className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+            title="編集"
+          >
+            <Pencil size={16} />
+          </button>
+          <button
+            onClick={() => handleDelete(site)}
+            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            title="削除"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      )}
     </div>
   )
 
@@ -192,22 +196,24 @@ export default function SitesPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-black text-gray-900">現場管理</h1>
-        {atSiteLimit ? (
-          <UpgradeButton className="flex items-center gap-2 py-2 px-4 bg-orange-50 border border-orange-300 text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-100 transition-colors disabled:opacity-60" />
-        ) : (
-          <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-2 py-2">
-            <Plus size={18} />
-            <span className="hidden sm:inline">現場を追加</span>
-          </button>
+        <h1 className="text-2xl font-black text-gray-900">現場{isAdmin ? '管理' : '一覧'}</h1>
+        {isAdmin && (
+          atSiteLimit ? (
+            <UpgradeButton className="flex items-center gap-2 py-2 px-4 bg-orange-50 border border-orange-300 text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-100 transition-colors disabled:opacity-60" />
+          ) : (
+            <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-2 py-2">
+              <Plus size={18} />
+              <span className="hidden sm:inline">現場を追加</span>
+            </button>
+          )
         )}
       </div>
 
-      {deleteError && (
+      {isAdmin && deleteError && (
         <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl px-4 py-3">{deleteError}</p>
       )}
 
-      {atSiteLimit && (
+      {isAdmin && atSiteLimit && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3">
           <Lock size={18} className="text-orange-500 flex-shrink-0" />
           <div className="flex-1">
@@ -255,7 +261,9 @@ export default function SitesPage() {
         <div className="card text-center py-12">
           <MapPin size={40} className="text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">現場がまだ登録されていません</p>
-          <button onClick={() => setShowAddModal(true)} className="mt-4 btn-primary py-2 px-4">最初の現場を追加</button>
+          {isAdmin && (
+            <button onClick={() => setShowAddModal(true)} className="mt-4 btn-primary py-2 px-4">最初の現場を追加</button>
+          )}
         </div>
       ) : (
         <>
