@@ -26,7 +26,8 @@ export default function ClockPage() {
     return () => clearInterval(timer)
   }, [])
 
-  const today = now.toISOString().split('T')[0]
+  // JST（ローカル時刻）で日付を取得。toISOString() は UTC になるため使わない
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
   const load = useCallback(async () => {
     const supabase = createClient()
