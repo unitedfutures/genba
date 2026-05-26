@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Camera, Send, MessageSquare, Clock, MapPin, Lock } from 'lucide-react'
+import { ArrowLeft, Camera, ImageIcon, Send, MessageSquare, Clock, MapPin, Lock } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Link from 'next/link'
 import UpgradeButton from '@/components/ui/UpgradeButton'
@@ -30,8 +30,10 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
   const [comments, setComments] = useState<any[]>(log.comments ?? [])
   const [newComment, setNewComment] = useState('')
   const [postingComment, setPostingComment] = useState(false)
-  const beforeInputRef = useRef<HTMLInputElement>(null)
-  const afterInputRef = useRef<HTMLInputElement>(null)
+  const beforeCameraRef = useRef<HTMLInputElement>(null)
+  const beforeGalleryRef = useRef<HTMLInputElement>(null)
+  const afterCameraRef = useRef<HTMLInputElement>(null)
+  const afterGalleryRef = useRef<HTMLInputElement>(null)
 
   async function handleSave(status?: 'draft' | 'submitted') {
     const isSub = status === 'submitted'
@@ -247,22 +249,28 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
             />
           ) : (
             <>
-              <input
-                ref={beforeInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={e => handlePhotoUpload(e, 'before')}
-              />
-              <button
-                onClick={() => beforeInputRef.current?.click()}
-                disabled={uploading}
-                className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-              >
-                <Camera size={20} />
-                {uploading ? 'アップロード中...' : '写真を追加'}
-              </button>
+              {/* カメラ撮影用（capture あり） */}
+              <input ref={beforeCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handlePhotoUpload(e, 'before')} />
+              {/* フォルダ選択用（capture なし） */}
+              <input ref={beforeGalleryRef} type="file" accept="image/*" className="hidden" onChange={e => handlePhotoUpload(e, 'before')} />
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => beforeCameraRef.current?.click()}
+                  disabled={uploading}
+                  className="border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-1.5 text-sm"
+                >
+                  <Camera size={16} />
+                  {uploading ? '...' : 'カメラ撮影'}
+                </button>
+                <button
+                  onClick={() => beforeGalleryRef.current?.click()}
+                  disabled={uploading}
+                  className="border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-1.5 text-sm"
+                >
+                  <ImageIcon size={16} />
+                  {uploading ? '...' : 'フォルダから選択'}
+                </button>
+              </div>
             </>
           )
         )}
@@ -294,22 +302,28 @@ export default function WorkLogForm({ log, profile, sites, plan }: Props) {
             />
           ) : (
             <>
-              <input
-                ref={afterInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={e => handlePhotoUpload(e, 'after')}
-              />
-              <button
-                onClick={() => afterInputRef.current?.click()}
-                disabled={uploading}
-                className="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-              >
-                <Camera size={20} />
-                {uploading ? 'アップロード中...' : '写真を追加'}
-              </button>
+              {/* カメラ撮影用（capture あり） */}
+              <input ref={afterCameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handlePhotoUpload(e, 'after')} />
+              {/* フォルダ選択用（capture なし） */}
+              <input ref={afterGalleryRef} type="file" accept="image/*" className="hidden" onChange={e => handlePhotoUpload(e, 'after')} />
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => afterCameraRef.current?.click()}
+                  disabled={uploading}
+                  className="border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-1.5 text-sm"
+                >
+                  <Camera size={16} />
+                  {uploading ? '...' : 'カメラ撮影'}
+                </button>
+                <button
+                  onClick={() => afterGalleryRef.current?.click()}
+                  disabled={uploading}
+                  className="border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-1.5 text-sm"
+                >
+                  <ImageIcon size={16} />
+                  {uploading ? '...' : 'フォルダから選択'}
+                </button>
+              </div>
             </>
           )
         )}
