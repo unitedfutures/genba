@@ -14,8 +14,10 @@ interface Log {
   status: string
   clock_in_at: string | null
   clock_out_at: string | null
+  work_description: string | null
   worker: { full_name: string } | null
   site: { name: string } | null
+  after_photos?: { id: string; url: string | null }[]
 }
 
 interface Worker {
@@ -232,25 +234,55 @@ export default function ReportsClient({ logs, workers, isAdmin, orgId, currentUs
             </h2>
             <div className="divide-y divide-gray-100">
               {dayLogs.map(log => (
-                <Link key={log.id} href={`/reports/${log.id}`} className="flex items-center gap-3 py-3 hover:bg-gray-50 -mx-4 px-4 transition-colors">
-                  <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-bold text-gray-600">
-                      {log.worker?.full_name?.[0] ?? '?'}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{log.worker?.full_name}</p>
-                    <p className="text-xs text-gray-500 truncate">{log.site?.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <StatusBadge type="worklog" status={log.status} />
-                    {log.clock_in_at && (
-                      <span className="text-xs text-gray-400">
-                        {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                        {log.clock_out_at && `〜${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`}
+                <Link key={log.id} href={`/reports/${log.id}`} className="block py-3 hover:bg-gray-50 -mx-4 px-4 transition-colors">
+                  {/* 上段：アバター・名前・現場・ステータス・時刻 */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-sm font-bold text-gray-600">
+                        {log.worker?.full_name?.[0] ?? '?'}
                       </span>
-                    )}
-                    <ChevronRight size={14} className="text-gray-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 text-sm">{log.worker?.full_name}</p>
+                          <p className="text-xs text-gray-500 truncate">{log.site?.name}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <StatusBadge type="worklog" status={log.status} />
+                          {log.clock_in_at && (
+                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                              {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                              {log.clock_out_at && `〜${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`}
+                            </span>
+                          )}
+                          <ChevronRight size={14} className="text-gray-300" />
+                        </div>
+                      </div>
+
+                      {/* 作業内容 */}
+                      {log.work_description && (
+                        <p className="text-xs text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
+                          {log.work_description}
+                        </p>
+                      )}
+
+                      {/* 作業後写真サムネイル */}
+                      {log.after_photos && log.after_photos.length > 0 && (
+                        <div className="flex gap-1.5 mt-2">
+                          {log.after_photos.map(photo => (
+                            photo.url && (
+                              <img
+                                key={photo.id}
+                                src={photo.url}
+                                alt="作業後"
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-100"
+                              />
+                            )
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}
