@@ -3,7 +3,7 @@ import { HardHat } from 'lucide-react'
 
 const rows = [
   { label: '販売事業者',     value: '株式会社ユナイテッドフューチャーズ' },
-  { label: '代表者',         value: '小林 稔幸' },
+  { label: '運営責任者',     value: '小林 佑輔' },
   { label: '所在地',         value: '東京都小金井市貫井南町3-22-27-703' },
   { label: '電話番号',       value: 'お問い合わせはメールにてお受けしております。ご請求があれば遅滞なく開示いたします。' },
   { label: 'メールアドレス', value: 'support@united-futures.com' },
