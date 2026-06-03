@@ -3,12 +3,12 @@ import { HardHat } from 'lucide-react'
 
 const rows = [
   { label: 'サービス名',     value: 'GENBA（現場タスク・進捗管理）' },
+  { label: 'サービスURL',    value: 'https://genba.works' },
   { label: '販売事業者',     value: '株式会社ユナイテッドフューチャーズ' },
   { label: '運営責任者',     value: '小林 佑輔' },
   { label: '所在地',         value: '東京都小金井市貫井南町3-22-27-703' },
   { label: '電話番号',       value: 'お問い合わせはメールにてお受けしております。ご請求があれば遅滞なく開示いたします。' },
   { label: 'メールアドレス', value: 'support@united-futures.com' },
-  { label: 'サービスURL',    value: 'https://genba.works' },
   {
     label: '販売価格',
     value: '無料プラン：¥0／月\nTEAMプラン：¥980／名／月（税込）\n※料金の詳細はサービスサイトのプランページをご確認ください。',
