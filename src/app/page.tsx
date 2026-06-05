@@ -785,6 +785,7 @@ export default async function LandingPage() {
           <div className="flex items-center gap-5 text-xs text-gray-600">
             <Link href="/auth/login" className="hover:text-gray-400 transition-colors">ログイン</Link>
             <Link href="/auth/signup" className="hover:text-gray-400 transition-colors">新規登録</Link>
+            <Link href="/contact" className="hover:text-gray-400 transition-colors">お問い合わせ</Link>
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">プライバシーポリシー</Link>
             <Link href="/tokusho" className="hover:text-gray-400 transition-colors">特定商取引法に基づく表記</Link>
             <span>© 2026 GENBA</span>
