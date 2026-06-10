@@ -50,7 +50,7 @@ export default async function DashboardPage({
 
   const supabase = await createClient()
   const orgId = profile.organization_id
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Tokyo' })
 
   const [
     { count: staffCount },
@@ -88,7 +88,7 @@ export default async function DashboardPage({
     <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-2xl font-black text-gray-900">ダッシュボード</h1>
-        <p className="text-gray-500 text-sm mt-1">{new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</p>
+        <p className="text-gray-500 text-sm mt-1">{new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Tokyo' })}</p>
       </div>
 
       {/* 新規アカウント向けセットアップガイド */}
@@ -186,8 +186,8 @@ export default async function DashboardPage({
                   </div>
                   {log.clock_in_at && (
                     <p className="text-xs text-gray-400">
-                      {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                      {log.clock_out_at ? `〜${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}` : '〜'}
+                      {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}
+                      {log.clock_out_at ? `〜${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}` : '〜'}
                     </p>
                   )}
                 </div>

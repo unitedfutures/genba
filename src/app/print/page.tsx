@@ -14,7 +14,7 @@ export default async function PrintPage({
 
   const supabase = await createClient()
   const targetStaffId = params.staff_id || profile.id
-  const targetMonth = params.month || new Date().toISOString().slice(0, 7)
+  const targetMonth = params.month || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Tokyo' }).slice(0, 7)
 
   // Workers can only view their own data
   if (profile.role !== 'admin' && targetStaffId !== profile.id) redirect('/reports')
@@ -59,12 +59,12 @@ export default async function PrintPage({
 
   const formatTime = (iso: string | null) => {
     if (!iso) return '—'
-    return new Date(iso).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+    return new Date(iso).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })
   }
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr + 'T00:00:00').toLocaleDateString('ja-JP', {
-      month: 'numeric', day: 'numeric', weekday: 'short',
+      month: 'numeric', day: 'numeric', weekday: 'short', timeZone: 'Asia/Tokyo',
     })
 
   const calcDuration = (inAt: string | null, outAt: string | null) => {

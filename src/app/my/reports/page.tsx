@@ -40,13 +40,13 @@ export default async function MyReportsPage() {
             <Link key={log.id} href={`/my/reports/${log.id}`} className="card flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="flex-1">
                 <p className="font-bold text-gray-900">
-                  {new Date(log.work_date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}
+                  {new Date(log.work_date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', timeZone: 'Asia/Tokyo' })}
                 </p>
                 <p className="text-sm text-gray-500">{(log.site as any)?.name}</p>
                 {log.clock_in_at && (
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                    {log.clock_out_at && ` 〜 ${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`}
+                    {new Date(log.clock_in_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}
+                    {log.clock_out_at && ` 〜 ${new Date(log.clock_out_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}`}
                   </p>
                 )}
               </div>

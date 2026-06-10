@@ -10,7 +10,7 @@ export default async function MyPage() {
   if (!profile) redirect('/auth/login')
 
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Tokyo' })
 
   const [{ data: todayLog }, { data: myTasks }, { data: recentLogs }] = await Promise.all([
     supabase.from('work_logs')
@@ -36,13 +36,13 @@ export default async function MyPage() {
 
   const isWorking = todayLog && todayLog.clock_in_at && !todayLog.clock_out_at
   const formatTime = (ts: string | null) =>
-    ts ? new Date(ts).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : null
+    ts ? new Date(ts).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' }) : null
 
   return (
     <div className="space-y-6 max-w-lg">
       <div>
         <h1 className="text-2xl font-black text-gray-900">おはようございます</h1>
-        <p className="text-gray-500 text-sm mt-1">{profile.full_name}さん · {new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
+        <p className="text-gray-500 text-sm mt-1">{profile.full_name}さん · {new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Tokyo' })}</p>
       </div>
 
       {/* Clock status card */}
