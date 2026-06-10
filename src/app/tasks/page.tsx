@@ -344,8 +344,11 @@ export default function TasksPage() {
             </>
           ) : (
             <>
-              <p className="font-bold text-gray-700 mb-1">担当タスクはありません</p>
-              <p className="text-sm text-gray-400">管理者からタスクが割り当てられると、ここに表示されます</p>
+              <p className="font-bold text-gray-700 mb-1">タスクがまだありません</p>
+              <p className="text-sm text-gray-400 mb-4">作業タスクを追加できます</p>
+              <button onClick={() => { setShowModal(true); setFormError('') }} className="btn-primary py-2 px-6 inline-flex items-center gap-2">
+                <Plus size={16} /> タスクを追加する
+              </button>
             </>
           )}
         </div>
