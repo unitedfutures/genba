@@ -109,6 +109,7 @@ export default function TasksPage() {
   const [orgId, setOrgId] = useState('')
   const [userId, setUserId] = useState('')
   const [filter, setFilter] = useState<TaskStatus | 'all'>('all')
+  const [siteFilter, setSiteFilter] = useState<string>('all')
   const [myOnly, setMyOnly] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const initialized = useRef(false)
@@ -249,6 +250,7 @@ export default function TasksPage() {
   const base = tasks
     .filter(t => !myOnly || t.assigned_to === userId)
     .filter(t => filter === 'all' || t.status === filter)
+    .filter(t => siteFilter === 'all' || t.site_id === siteFilter)
   const sorted = [...base].sort((a, b) => {
     let cmp = 0
     if (sortKey === 'due_date') {
@@ -291,18 +293,30 @@ export default function TasksPage() {
       </div>
 
       {/* フィルター */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {statusFilters.map(f => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === f.value ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={siteFilter}
+          onChange={e => setSiteFilter(e.target.value)}
+          className="text-sm border border-gray-200 rounded-full px-4 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-orange-400 font-medium text-gray-700"
+        >
+          <option value="all">📍 すべての現場</option>
+          {sites.map(s => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+        <div className="flex gap-2 overflow-x-auto">
+          {statusFilters.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                filter === f.value ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 並び替え */}
