@@ -108,7 +108,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true)
   const [orgId, setOrgId] = useState('')
   const [userId, setUserId] = useState('')
-  const [filter, setFilter] = useState<TaskStatus | 'all'>('all')
+  const [activeStatuses, setActiveStatuses] = useState<Set<TaskStatus>>(new Set(['pending', 'in_progress']))
   const [siteFilter, setSiteFilter] = useState<string>('all')
   const [myOnly, setMyOnly] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -247,9 +247,17 @@ export default function TasksPage() {
     }
   }
 
+  function toggleStatus(s: TaskStatus) {
+    setActiveStatuses(prev => {
+      const next = new Set(prev)
+      if (next.has(s)) { next.delete(s) } else { next.add(s) }
+      return next
+    })
+  }
+
   const base = tasks
     .filter(t => !myOnly || t.assigned_to === userId)
-    .filter(t => filter === 'all' || t.status === filter)
+    .filter(t => activeStatuses.size === 0 || activeStatuses.has(t.status))
     .filter(t => siteFilter === 'all' || t.site_id === siteFilter)
   const sorted = [...base].sort((a, b) => {
     let cmp = 0
@@ -265,11 +273,11 @@ export default function TasksPage() {
     return sortDir === 'asc' ? cmp : -cmp
   })
 
-  const statusFilters: { label: string; value: TaskStatus | 'all' }[] = [
-    { label: 'すべて', value: 'all' },
+  const statusFilters: { label: string; value: TaskStatus }[] = [
     { label: '未着手', value: 'pending' },
     { label: '作業中', value: 'in_progress' },
     { label: '完了', value: 'completed' },
+    { label: 'キャンセル', value: 'cancelled' },
   ]
 
   return (
@@ -305,12 +313,20 @@ export default function TasksPage() {
           ))}
         </select>
         <div className="flex gap-2 overflow-x-auto">
+          <button
+            onClick={() => setActiveStatuses(new Set())}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              activeStatuses.size === 0 ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'
+            }`}
+          >
+            すべて
+          </button>
           {statusFilters.map(f => (
             <button
               key={f.value}
-              onClick={() => setFilter(f.value)}
+              onClick={() => toggleStatus(f.value)}
               className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                filter === f.value ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'
+                activeStatuses.has(f.value) ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'
               }`}
             >
               {f.label}
