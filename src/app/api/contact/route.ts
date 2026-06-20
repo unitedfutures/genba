@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const SUPPORT_EMAIL = 'support@united-futures.com'
 const FROM_EMAIL    = 'noreply@genba.works'
@@ -23,8 +24,9 @@ export async function POST(request: Request) {
 ${message}
   `.trim()
 
-  try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+  // メール送信と DB 保存を並行実行
+  const [emailRes, dbRes] = await Promise.allSettled([
+    fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,16 +39,21 @@ ${message}
         subject: `【GENBAお問い合わせ】${type}：${name} 様`,
         textContent: body,
       }),
-    })
+    }),
+    createAdminClient()
+      .from('contact_inquiries')
+      .insert({ company: company || null, name, email, phone: phone || null, type, message }),
+  ])
 
-    if (!res.ok) {
-      console.error('Brevo error:', res.status, await res.text())
-      return NextResponse.json({ error: 'メール送信に失敗しました' }, { status: 500 })
-    }
-
-    return NextResponse.json({ ok: true })
-  } catch (e) {
-    console.error('Contact API error:', e)
-    return NextResponse.json({ error: 'サーバーエラーが発生しました' }, { status: 500 })
+  if (emailRes.status === 'rejected' || (emailRes.status === 'fulfilled' && !emailRes.value.ok)) {
+    const detail = emailRes.status === 'rejected' ? emailRes.reason : await emailRes.value.text()
+    console.error('Brevo error:', detail)
+    return NextResponse.json({ error: 'メール送信に失敗しました' }, { status: 500 })
   }
+
+  if (dbRes.status === 'rejected' || dbRes.value.error) {
+    console.error('DB save error:', dbRes.status === 'rejected' ? dbRes.reason : dbRes.value.error)
+  }
+
+  return NextResponse.json({ ok: true })
 }
