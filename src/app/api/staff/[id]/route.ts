@@ -26,6 +26,19 @@ export async function DELETE(
     return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 })
   }
 
+  // 削除前に人数と Stripe 情報を取得（削除後のカウントは cascade タイミングにより不正確なため）
+  const [{ count: currentCount }, { data: org }] = await Promise.all([
+    admin
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', profile.organization_id),
+    admin
+      .from('organizations')
+      .select('plan, stripe_subscription_id')
+      .eq('id', profile.organization_id)
+      .single(),
+  ])
+
   // Supabase Auth からユーザー削除（profiles は cascade で削除される）
   const { error: deleteError } = await admin.auth.admin.deleteUser(id)
   if (deleteError) {
@@ -33,25 +46,13 @@ export async function DELETE(
     return NextResponse.json({ error: `ユーザーの削除に失敗しました: ${deleteError.message}` }, { status: 500 })
   }
 
-  // 削除後の人数を取得
-  const { count: newCount } = await admin
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-    .eq('organization_id', profile.organization_id)
-
   // Stripe サブスクリプションの quantity を更新（有料プランのみ）
-  const { data: org } = await admin
-    .from('organizations')
-    .select('plan, stripe_subscription_id')
-    .eq('id', profile.organization_id)
-    .single()
-
   if (org?.plan === 'paid' && org.stripe_subscription_id) {
     try {
+      const quantity = Math.max((currentCount ?? 2) - 1, 1)
       const subscription = await getStripe().subscriptions.retrieve(org.stripe_subscription_id)
       const item = subscription.items.data[0]
       if (item) {
-        const quantity = Math.max(newCount ?? 1, 1)
         await getStripe().subscriptionItems.update(item.id, { quantity })
       }
     } catch (e) {
