@@ -788,7 +788,7 @@ export default async function LandingPage() {
             <Link href="/contact" className="hover:text-gray-400 transition-colors">お問い合わせ</Link>
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">プライバシーポリシー</Link>
             <Link href="/tokusho" className="hover:text-gray-400 transition-colors">特定商取引法に基づく表記</Link>
-            <span>© 2026 GENBA</span>
+            <a href="https://united-futures.com/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">© 2026 UNITED FUTURES, INC.</a>
           </div>
         </div>
       </footer>

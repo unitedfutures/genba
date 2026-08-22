@@ -82,6 +82,7 @@ export default function TokushoPage() {
             <Link href="/contact" className="hover:text-gray-300 transition-colors">お問い合わせ</Link>
             <Link href="/privacy" className="hover:text-gray-300 transition-colors">プライバシーポリシー</Link>
             <Link href="/" className="hover:text-gray-300 transition-colors">← トップページへ戻る</Link>
+            <a href="https://united-futures.com/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300 transition-colors">© 2026 UNITED FUTURES, INC.</a>
           </div>
         </div>
       </footer>
